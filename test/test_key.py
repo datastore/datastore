@@ -1,11 +1,9 @@
-#!/usr/bin/env python
 
 import unittest
 import random
 
 from datastore import Key
 from datastore import Namespace
-
 
 
 def randomString():

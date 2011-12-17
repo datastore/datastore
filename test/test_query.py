@@ -8,7 +8,6 @@ from datastore.query import Filter, Order, Query
 
 
 
-
 def objects():
   sr1 = {}
   sr1['key'] = '/ABCD'
