@@ -374,6 +374,10 @@ class TestQuery(unittest.TestCase):
     self.assertEqual(q2, eval(repr(q2)))
     self.assertEqual(q3, eval(repr(q3)))
 
+    self.assertEqual(q1, q1.copy())
+    self.assertEqual(q2, q2.copy())
+    self.assertEqual(q3, q3.copy())
+
 
   def test_cursor(self):
 

@@ -297,6 +297,17 @@ class Query(object):
   def __hash__(self):
     return hash(repr(self))
 
+  def copy(self):
+    '''Returns a copy of this query.'''
+    if self.object_getattr is Query.object_getattr:
+      other = Query()
+    else:
+      other = Query(object_getattr=self.object_getattr)
+    other.limit = self.limit
+    other.offset = self.offset
+    other.filters = self.filters
+    other.orders = self.orders
+    return other
 
   def dict(self):
     '''Returns a dictionary representing this query.'''
