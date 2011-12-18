@@ -37,14 +37,18 @@ def limit_gen(limit, iterable):
     limit -= 1
 
 
-def offset_gen(offset, iterable):
-  '''A generator that applies an `offset`.'''
+def offset_gen(offset, iterable, skip_signal=None):
+  '''A generator that applies an `offset`, skipping `offset` elements from `iterable`.
+  If skip_signal is a callable, it will be called with every skipped element.
+  '''
   offset = int(offset)
   assert offset >= 0, 'negative offset'
 
   for item in iterable:
     if offset > 0:
       offset -= 1
+      if callable(skip_signal):
+        skip_signal(item)
     else:
       yield item
 
@@ -248,19 +252,12 @@ class Query(object):
              perform their own optimizations.
     '''
 
-    if len(self.filters) > 0:
-      iterable = Filter.filter(self.filters, iterable)
-
-    if len(self.orders) > 0:
-      iterable = Order.sorted(iterable, self.orders) # not a generator :(
-
-    if self.offset != 0:
-      iterable = offset_gen(self.offset, iterable)
-
-    if self.limit is not None:
-      iterable = limit_gen(self.offset, iterable)
-
-    return iterable
+    cursor = Cursor(self, iterable)
+    cursor.apply_filter()
+    cursor.apply_order()
+    cursor.apply_offset()
+    cursor.apply_limit()
+    return cursor
 
 
   def order(self, order):
@@ -335,3 +332,96 @@ class Query(object):
       elif key in ['limit', 'offset']:
         setattr(query, key, value)
     return query
+
+
+
+
+class Cursor(object):
+  '''Represents a query result generator.'''
+
+  __slots__ = ('query', '_iterable', '_iterator', 'skipped', 'returned', )
+
+  def __init__(self, query, iterable):
+    if not isinstance(query, Query):
+      raise ValueError('Cursor received invalid query: %s' % query)
+
+    if not iterable:
+      raise ValueError('Cursor received invalid iterable: %s' % iterable)
+
+    self.query = query
+    self._iterable = iterable
+    self._iterator = None
+    self.returned = 0
+    self.skipped = 0
+
+
+  def __iter__(self):
+    '''The cursor itself is the iterator. Note that it cannot be used twice,
+    and once iteration starts, the cursor cannot be modified.
+    '''
+    if self._iterator:
+      raise RuntimeError('Attempt to iterate over Cursor twice.')
+
+    self._iterator = iter(self._iterable)
+    return self
+
+  def next(self):
+    '''Iterator next. Build up the count of returned elements as iteration happens.'''
+
+    # if iteration has not begun, begin it.
+    if not self._iterator:
+      self.__iter__()
+
+    next = self._iterator.next()
+    if next is not StopIteration:
+      self._returned_inc(next)
+    return next
+
+
+  def _skipped_inc(self, item):
+    '''A function to increment the skipped count.'''
+    self.skipped += 1
+
+  def _returned_inc(self, item):
+    '''A function to increment the returned count.'''
+    self.returned += 1
+
+
+  def _ensure_modification_is_safe(self):
+    '''Assertions to ensure modification of this Cursor is safe.'''
+    assert self.query, 'Cursor must have a Query.'
+    assert self._iterable, 'Cursot must have a resultset iterable.'
+    assert not self._iterator, 'Cursor must not be modified once iteration begins.'
+
+
+  def apply_filter(self):
+    '''Naively apply query filters.'''
+    self._ensure_modification_is_safe()
+
+    if len(self.query.filters) > 0:
+      self._iterable = Filter.filter(self.query.filters, self._iterable)
+
+  def apply_order(self):
+    '''Naively apply query orders.'''
+    self._ensure_modification_is_safe()
+
+    if len(self.query.orders) > 0:
+      self._iterable = Order.sorted(self._iterable, self.query.orders)
+      # not a generator :(
+
+  def apply_offset(self):
+    '''Naively apply query offset.'''
+    self._ensure_modification_is_safe()
+
+    if self.query.offset != 0:
+      self._iterable = \
+        offset_gen(self.query.offset, self._iterable, self._skipped_inc)
+        # _skipped_inc helps keep count of skipped elements
+
+  def apply_limit(self):
+    '''Naively apply query limit.'''
+    self._ensure_modification_is_safe()
+
+    if self.query.limit is not None:
+      self._iterable = limit_gen(self.query.limit, self._iterable)
+

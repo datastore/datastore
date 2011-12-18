@@ -4,11 +4,11 @@ import unittest
 import hashlib
 import nanotime
 
-from datastore.query import Filter, Order, Query
+from datastore.query import Filter, Order, Query, Cursor
 
 
 
-def objects():
+def version_objects():
   sr1 = {}
   sr1['key'] = '/ABCD'
   sr1['hash'] = hashlib.sha1('herp').hexdigest()
@@ -47,7 +47,7 @@ class TestFilter(unittest.TestCase):
 
   def test_basic(self):
 
-    v1, v2, v3 = objects()
+    v1, v2, v3 = version_objects()
     vs = [v1, v2, v3]
 
     t1 = v1['committed']
@@ -266,7 +266,7 @@ class TestOrder(unittest.TestCase):
     o2 = Order('+committed')
     o3 = Order('-created')
 
-    v1, v2, v3 = objects()
+    v1, v2, v3 = version_objects()
 
     # test  isAscending
     self.assertTrue(o1.isAscending())
@@ -347,7 +347,6 @@ class TestQuery(unittest.TestCase):
     q3 = Query(object_getattr=getattr)
 
     q1.offset = 300
-    q2.keysonly = True
     q3.limit = 1
 
     q1.filter('key', '>', '/ABC')
@@ -374,6 +373,90 @@ class TestQuery(unittest.TestCase):
     self.assertEqual(q1, eval(repr(q1)))
     self.assertEqual(q2, eval(repr(q2)))
     self.assertEqual(q3, eval(repr(q3)))
+
+
+  def test_cursor(self):
+
+    self.assertRaises(ValueError, Cursor, None, None)
+    self.assertRaises(ValueError, Cursor, Query(), None)
+    self.assertRaises(ValueError, Cursor, None, [1])
+    c = Cursor(Query(), [1, 2, 3, 4, 5]) # should not raise
+
+    self.assertEqual(c.skipped, 0)
+    self.assertEqual(c.returned, 0)
+    self.assertEqual(c._iterable, [1, 2, 3, 4, 5])
+
+    c.skipped = 1
+    c.returned = 2
+    self.assertEqual(c.skipped, 1)
+    self.assertEqual(c.returned, 2)
+
+    c._skipped_inc(None)
+    c._skipped_inc(None)
+    self.assertEqual(c.skipped, 3)
+
+    c._returned_inc(None)
+    c._returned_inc(None)
+    c._returned_inc(None)
+    self.assertEqual(c.returned, 5)
+
+    self.subtest_cursor(Query(), [5, 4, 3, 2, 1], [5, 4, 3, 2, 1])
+    self.subtest_cursor(Query(limit=3), [5, 4, 3, 2, 1], [5, 4, 3])
+    self.subtest_cursor(Query(limit=0), [5, 4, 3, 2, 1], [])
+    self.subtest_cursor(Query(offset=2), [5, 4, 3, 2, 1], [3, 2, 1])
+    self.subtest_cursor(Query(offset=5), [5, 4, 3, 2, 1], [])
+    self.subtest_cursor(Query(limit=2, offset=2), [5, 4, 3, 2, 1], [3, 2])
+
+    v1, v2, v3 = version_objects()
+    vs = [v1, v2, v3]
+
+    t1 = v1['committed']
+    t2 = v2['committed']
+    t3 = v3['committed']
+
+    self.subtest_cursor(Query(), vs, vs)
+    self.subtest_cursor(Query(limit=2), vs, [v1, v2])
+    self.subtest_cursor(Query(offset=1), vs, [v2, v3])
+    self.subtest_cursor(Query(offset=1, limit=1), vs, [v2])
+
+    self.subtest_cursor(Query().filter('committed', '>=', t2), vs, [v2, v3])
+    self.subtest_cursor(Query().filter('committed', '<=', t1), vs, [v1])
+
+    self.subtest_cursor(Query().order('+committed'), vs, [v1, v2, v3])
+    self.subtest_cursor(Query().order('-created'), vs, [v3, v2, v1])
+
+
+  def subtest_cursor(self, query, iterable, expected_results):
+
+    self.assertRaises(ValueError, Cursor, None, None)
+    self.assertRaises(ValueError, Cursor, query, None)
+    self.assertRaises(ValueError, Cursor, None, iterable)
+    cursor = Cursor(query, iterable)
+    self.assertEqual(cursor.skipped, 0)
+    self.assertEqual(cursor.returned, 0)
+
+    cursor._ensure_modification_is_safe()
+    cursor.apply_filter()
+    cursor.apply_order()
+    cursor.apply_offset()
+    cursor.apply_limit()
+
+    cursor_results = []
+    for i in cursor:
+      self.assertRaises(AssertionError, cursor._ensure_modification_is_safe)
+      self.assertRaises(AssertionError, cursor.apply_filter)
+      self.assertRaises(AssertionError, cursor.apply_order)
+      self.assertRaises(AssertionError, cursor.apply_offset)
+      self.assertRaises(AssertionError, cursor.apply_limit)
+      cursor_results.append(i)
+
+    self.assertRaises(RuntimeError, iter, cursor) # ensure iteration happens only once.
+
+    self.assertEqual(cursor_results, expected_results)
+    self.assertEqual(cursor.returned, len(expected_results))
+    self.assertEqual(cursor.skipped, query.offset)
+    if query.limit:
+      self.assertTrue(cursor.returned <= query.limit)
 
 
 if __name__ == '__main__':
