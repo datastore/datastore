@@ -53,6 +53,11 @@ def offset_gen(offset, iterable, skip_signal=None):
       yield item
 
 
+def chain_gen(iterables):
+  '''A generator that chains `iterables`.'''
+  for iterable in iterables:
+    for item in iterable:
+      yield item
 
 
 class Filter(object):
