@@ -1,4 +1,5 @@
 
+from query import Cursor
 
 try:
   from collections import OrderedDict
@@ -67,7 +68,7 @@ class Datastore(object):
       query: Query object describing the objects to return.
 
     Raturns:
-      iterable with all objects matching criteria
+      Cursor with all objects matching criteria
     '''
     raise NotImplementedError
 
@@ -276,8 +277,24 @@ class ShardedDatastore(DatastoreCollection):
 
   def query(self, query):
     '''Returns a sequence of objects matching criteria expressed in `query`'''
-    items = []
-    results = [s.query(query) for s in self._stores]
-    map(items.extend, results)
-    items = sorted(items, cmp=query.orderFn)
-    return items[:query.limit]
+    cursor = Cursor(query, self.shard_query_generator(query))
+    cursor.apply_order()  # ordering sharded queries is pretty expensive (no generator)
+    return cursor
+
+  def shard_query_generator(self, query):
+    '''A generator that queries each shard in sequence.'''
+    shard_query = query.copy()
+
+    for shard in self._stores:
+      # yield all items matching within this shard
+      cursor = shard.query(shard_query)
+      for item in cursor:
+        yield item
+
+      # update query with results of first query
+      shard_query.offset = max(shard_query.offset - cursor.skipped, 0)
+      if shard_query.limit:
+        shard_query.limit = max(shard_query.limit - cursor.returned, 0)
+
+        if shard_query.limit <= 0:
+          break  # we're already done!
