@@ -1,5 +1,9 @@
 
 
+try:
+  from collections import OrderedDict
+except ImportError:
+  from ordereddict import OrderedDict
 
 
 class Datastore(object):
@@ -89,7 +93,7 @@ class DictDatastore(Datastore):
   '''Simple straw-man in-memory datastore backed by a dict.'''
 
   def __init__(self):
-    self._items = {}
+    self._items = OrderedDict()
 
   def get(self, key):
     '''Return the object named by key.'''
