@@ -345,6 +345,8 @@ class Query(object):
     return query
 
 
+def is_iterable(obj):
+  return hasattr(obj, '__iter__') or hasattr(obj, '__getitem__')
 
 
 class Cursor(object):
@@ -356,7 +358,7 @@ class Cursor(object):
     if not isinstance(query, Query):
       raise ValueError('Cursor received invalid query: %s' % query)
 
-    if not iterable:
+    if not is_iterable(iterable):
       raise ValueError('Cursor received invalid iterable: %s' % iterable)
 
     self.query = query
@@ -401,7 +403,7 @@ class Cursor(object):
   def _ensure_modification_is_safe(self):
     '''Assertions to ensure modification of this Cursor is safe.'''
     assert self.query, 'Cursor must have a Query.'
-    assert self._iterable, 'Cursot must have a resultset iterable.'
+    assert is_iterable(self._iterable), 'Cursor must have a resultset iterable.'
     assert not self._iterator, 'Cursor must not be modified once iteration begins.'
 
 
