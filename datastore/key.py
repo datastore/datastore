@@ -100,6 +100,11 @@ class Key(object):
     return Namespace(self.list[-1]).field
 
   @property
+  def path(self):
+    '''Returns the path of this Key, the parent and the type.'''
+    return Key(str(self.parent) + '/' + self.type)
+
+  @property
   def parent(self):
     '''Returns the parent Key (all namespaces except the last).
 

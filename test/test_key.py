@@ -18,13 +18,18 @@ class KeyTests(unittest.TestCase):
 
   def __subtest_basic(self, string):
     fixedString = Key.removeDuplicateSlashes(string)
-    name = fixedString.rsplit('/')[-1].split(':')[-1]
+    lastNamespace = fixedString.rsplit('/')[-1].split(':')
+    ktype = lastNamespace[0] if len(lastNamespace) > 1 else ''
+    name = lastNamespace[-1]
+    path = fixedString.rsplit('/', 1)[0] + '/' + ktype
 
     self.assertEqual(Key(string)._string, fixedString)
     self.assertEqual(Key(string), Key(string))
     self.assertEqual(str(Key(string)), fixedString)
     self.assertEqual(repr(Key(string)), "Key('%s')" % fixedString)
     self.assertEqual(Key(string).name, name)
+    self.assertEqual(Key(string).type, ktype)
+    self.assertEqual(Key(string).path, Key(path))
     self.assertEqual(Key(string), eval(repr(Key(string))))
 
     self.assertRaises(TypeError, cmp, Key(string), string)
@@ -76,6 +81,7 @@ class KeyTests(unittest.TestCase):
     self.assertFalse(k1.isAncestorOf(k1))
     self.assertEqual(k1.child('D'), k2)
     self.assertEqual(k1, k2.parent)
+    self.assertEqual(k1.path, k2.parent.path)
 
   def test_type(self):
     k1 = Key('/A/B/C:c')
