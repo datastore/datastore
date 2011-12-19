@@ -1,5 +1,5 @@
 
-'''
+__doc__ = '''
 This package contains all the specific datastore implementations.
 
 Currently, the main distribution tracks:
