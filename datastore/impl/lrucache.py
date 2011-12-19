@@ -1,6 +1,6 @@
 
-import basic
 import pylru
+from datastore import basic
 
 __version__ = '1.0'
 __author__ = 'Juan Batiz-Benet <jbenet@cs.stanford.edu>'
