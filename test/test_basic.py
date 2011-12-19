@@ -8,7 +8,7 @@ from datastore import Query
 
 class TestDatastore(unittest.TestCase):
 
-  def test_simple(self, stores=[], numelems=100):
+  def test_simple(self, stores=[], numelems=1000):
 
     def checkLength(len):
       try:

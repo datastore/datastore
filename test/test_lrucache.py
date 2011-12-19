@@ -2,13 +2,13 @@
 import unittest
 
 from datastore import Key
+from datastore.impl import lrucache
+
 from test_basic import TestDatastore
 
 class TestLRUCacheDatastore(TestDatastore):
 
   def test_lru(self):
-
-    from dronestore.datastore import lrucache
 
     lru1 = lrucache.LRUCache(1000)
     lru2 = lrucache.LRUCache(2000)
