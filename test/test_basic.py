@@ -70,15 +70,17 @@ class TestDatastore(unittest.TestCase):
           pass
 
     for sn in stores:
-      dsresults = list(stores[0].query(Query()))
+      dsresults = list(stores[0].query(Query(pkey)))
 
+    k = pkey
     n = int(numelems)
-    test_query(Query(), list(range(0, n))) # make sure everything is there.
-    test_query(Query(), dsresults[:n])
-    test_query(Query(limit=n), dsresults[:n])
-    test_query(Query(limit=n/2), dsresults[:n/2])
-    test_query(Query(offset=n/2), dsresults[n/2:])
-    test_query(Query(offset=n/3, limit=n/3), dsresults[n/3: 2*n/3])
+    test_query(Query(k), list(range(0, n))) # make sure everything is there.
+    test_query(Query(k), dsresults[:n])
+    test_query(Query(k, limit=n), dsresults[:n])
+    test_query(Query(k, limit=n/2), dsresults[:n/2])
+    test_query(Query(k, offset=n/2), dsresults[n/2:])
+    test_query(Query(k, offset=n/3, limit=n/3), dsresults[n/3: 2*(n/3)])
+    del k
     del n
 
     # change numelems elems

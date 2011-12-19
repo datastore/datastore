@@ -96,10 +96,16 @@ class DictDatastore(Datastore):
   def __init__(self):
     self._items = OrderedDict()
 
+  def _collection(self, key):
+    collection = str(key.path)
+    if not collection in self._items:
+      self._items[collection] = OrderedDict()
+    return self._items[collection]
+
   def get(self, key):
     '''Return the object named by key.'''
     try:
-      return self._items[key]
+      return self._collection(key)[key]
     except KeyError, e:
       return None
 
@@ -108,26 +114,32 @@ class DictDatastore(Datastore):
     if value is None:
       self.delete(key)
     else:
-      self._items[key] = value
+      self._collection(key)[key] = value
 
   def delete(self, key):
     '''Removes the object.'''
     try:
-      del self._items[key]
+      del self._collection(key)[key]
+
+      if len(self._collection(key)) == 0:
+        del self._items[str(key.path)]
     except KeyError, e:
       pass
 
   def contains(self, key):
     '''Returns whether the object is in this datastore.'''
-    return key in self._items
+    return key in self._collection(key)
 
   def query(self, query):
     '''Returns a sequence of objects matching criteria expressed in `query`'''
     # entire dataset already in memory, so ok to apply query naively
-    return query(self._items.values())
+    if str(query.key) in self._items:
+      return query(self._items[str(query.key)].values())
+    else:
+      return query([])
 
   def __len__(self):
-    return len(self._items)
+    return sum(map(len, self._items.values()))
 
 
 
