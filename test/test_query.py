@@ -457,7 +457,8 @@ class TestQuery(unittest.TestCase):
       self.assertRaises(AssertionError, cursor.apply_limit)
       cursor_results.append(i)
 
-    self.assertRaises(RuntimeError, iter, cursor) # ensure iteration happens only once.
+    # ensure iteration happens only once.
+    self.assertRaises(RuntimeError, iter, cursor)
 
     self.assertEqual(cursor_results, expected_results)
     self.assertEqual(cursor.returned, len(expected_results))

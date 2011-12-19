@@ -57,16 +57,16 @@ class MongoDatastore(datastore.Datastore):
     return self._collectionNamed(self._collectionNameForKey(key))
 
   @staticmethod
-  def _wrap(key, value):
+  def _wrap(key, val):
     '''Returns a value to insert. Non-documents are wrapped in a document.'''
-    if not isinstance(value, dict) or Doc.key not in value or value[Doc.key] != key:
-      return { Doc.key:key, Doc.value:value, Doc.wrapped:True}
+    if not isinstance(val, dict) or Doc.key not in val or val[Doc.key] != key:
+      return { Doc.key:key, Doc.value:val, Doc.wrapped:True}
 
     #TODO is this necessary?
-    if Doc._id in value:
-      del value[Doc._id]
+    if Doc._id in val:
+      del val[Doc._id]
 
-    return value
+    return val
 
   @staticmethod
   def _unwrap(value):
@@ -86,13 +86,14 @@ class MongoDatastore(datastore.Datastore):
     value = self._collection(key).find_one( { Doc.key:str(key) } )
     return self._unwrap(value)
 
+  update_opts = {'upsert' : True, 'safe': True}
   def put(self, key, value):
     '''Stores the object.'''
     strkey = str(key)
     value = self._wrap(strkey, value)
 
     # update (or insert) the relevant document matching key
-    self._collection(key).update( { Doc.key:strkey }, value, upsert=True, safe=True)
+    self._collection(key).update({Doc.key:strkey}, value, **self.update_opts)
 
   def delete(self, key):
     '''Removes the object.'''
@@ -136,7 +137,7 @@ class MongoQuery(object):
       mongo_cursor.skip(query.offset)
 
     # must execute before the limit to make sure the counts yield only skipped.
-    skipped = mongo_cursor.count() - mongo_cursor.count(with_limit_and_skip=True)
+    skip = mongo_cursor.count() - mongo_cursor.count(with_limit_and_skip=True)
 
     if query.limit:
       mongo_cursor.limit(query.limit)
@@ -146,7 +147,7 @@ class MongoQuery(object):
 
     # create datastore Cursor with query and iterable of results
     datastore_cursor = datastore.Cursor(query, iterable)
-    datastore_cursor.skipped = skipped
+    datastore_cursor.skipped = skip
     return datastore_cursor
 
   @classmethod

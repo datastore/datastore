@@ -5,9 +5,10 @@ from key import Key
 def _object_getattr(obj, field):
   '''Attribute getter for the objects to operate on.
 
-  This function can be overridden in classes or instances of Query, Filter, and Order.
-  Thus, a custom function to extract values to attributes can be specified, and the
-  system can remain agnostic to the client's data model, without loosing query power.
+  This function can be overridden in classes or instances of Query, Filter, and
+  Order. Thus, a custom function to extract values to attributes can be
+  specified, and the system can remain agnostic to the client's data model,
+  without loosing query power.
   '''
 
   # TODO: consider changing this to raise an exception if no value is found.
@@ -40,8 +41,9 @@ def limit_gen(limit, iterable):
 
 
 def offset_gen(offset, iterable, skip_signal=None):
-  '''A generator that applies an `offset`, skipping `offset` elements from `iterable`.
-  If skip_signal is a callable, it will be called with every skipped element.
+  '''A generator that applies an `offset`, skipping `offset` elements from
+  `iterable`. If skip_signal is a callable, it will be called with every
+  skipped element.
   '''
   offset = int(offset)
   assert offset >= 0, 'negative offset'
@@ -96,7 +98,7 @@ class Filter(object):
     value = self.object_getattr(obj, self.field)
 
     # TODO: which way should the direction go here? it may make more sense to
-    #       convert the passed-in value instead. Or try both? Or not do it at all?
+    #       convert the passed-in value instead. Or try both? Or not at all?
     if not isinstance(value, self.value.__class__):
       value = self.value.__class__(value)
 
@@ -241,18 +243,18 @@ class Query(object):
              Key('/MontyPython/Actor:EricIdle')
              Key('/MontyPython/Actor:GrahamChapman')
 
-            It is up to datastores how to implement this namespacing. For example,
+            It is up to datastores how to implement this namespacing. E.g.,
             some datastores may store values in different tables or collections.
 
       limit: an integer representing the maximum number of results to return.
 
       offset: an integer representing a number of results to skip.
 
-      object_getattr: a function to extract attribute values from an object. It is
-           used to satisfy query filters and orders. Defining this function allows
-           the client to control the data model of the stored values. The default
-           function attempts to access values as attributes (__getattr__) or items
-           (__getitem__).
+      object_getattr: a function to extract attribute values from an object. It
+           is used to satisfy query filters and orders. Defining this function
+           allows the client to control the data model of the stored values.
+           The default function attempts to access values as attributes
+           (__getattr__) or items (__getitem__).
     '''
     if not isinstance(key, Key):
       raise TypeError('key must be of type %s' % Key)
@@ -304,7 +306,7 @@ class Query(object):
     '''
     order = order if isinstance(order, Order) else Order(order)
 
-    # ensure order gets attribute values the same way the rest of the query does.
+    # ensure order gets attr values the same way the rest of the query does.
     order.object_getattr = self.object_getattr
     self.orders.append(order)
     return self # for chaining
@@ -321,7 +323,7 @@ class Query(object):
     else:
       filter = Filter(*args)
 
-    # ensure filter gets attribute values the same way the rest of the query does.
+    # ensure filter gets attr values the same way the rest of the query does.
     filter.object_getattr = self.object_getattr
     self.filters.append(filter)
     return self # for chaining
@@ -418,7 +420,7 @@ class Cursor(object):
     return self
 
   def next(self):
-    '''Iterator next. Build up the count of returned elements as iteration happens.'''
+    '''Iterator next. Build up count of returned elements during iteration.'''
 
     # if iteration has not begun, begin it.
     if not self._iterator:
@@ -443,7 +445,7 @@ class Cursor(object):
     '''Assertions to ensure modification of this Cursor is safe.'''
     assert self.query, 'Cursor must have a Query.'
     assert is_iterable(self._iterable), 'Cursor must have a resultset iterable.'
-    assert not self._iterator, 'Cursor must not be modified once iteration begins.'
+    assert not self._iterator, 'Cursor must not be modified after iteration.'
 
 
   def apply_filter(self):

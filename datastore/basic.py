@@ -144,9 +144,9 @@ class DictDatastore(Datastore):
 
 
 class ShimDatastore(Datastore):
-  '''Represents a non-concrete datastore that adds functionality between the client
-  and a lower level datastore. Shim datastores do not actually store data themselves;
-  instead, they delegate storage to the underlying datastore.
+  '''Represents a non-concrete datastore that adds functionality between the
+  client and a lower level datastore. Shim datastores do not actually store
+  data themselves; instead, they delegate storage to the underlying datastore.
   '''
   pass
 
@@ -298,7 +298,7 @@ class ShardedDatastore(DatastoreCollection):
   def query(self, query):
     '''Returns a sequence of objects matching criteria expressed in `query`'''
     cursor = Cursor(query, self.shard_query_generator(query))
-    cursor.apply_order()  # ordering sharded queries is pretty expensive (no generator)
+    cursor.apply_order()  # ordering sharded queries is expensive (no generator)
     return cursor
 
   def shard_query_generator(self, query):

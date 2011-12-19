@@ -12,7 +12,8 @@ class TestMemcachedDatastore(TestDatastore):
   servers = ['127.0.0.1']
 
   def setUp(self):
-    self.client = pylibmc.Client(self.servers, binary=True, behaviors=self.behaviors)
+    c = pylibmc.Client(self.servers, binary=True, behaviors=self.behaviors)
+    self.client = c
     self.client.flush_all()
 
   def tearDown(self):
