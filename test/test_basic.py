@@ -63,10 +63,14 @@ class TestDatastore(unittest.TestCase):
           self.assertEqual(result, expected)
 
         except NotImplementedError:
-          pass
+          print 'WARNING: %s does not implement query.' % sn
 
     for sn in stores:
-      dsresults = list(stores[0].query(Query(pkey)))
+      try:
+        dsresults = list(stores[0].query(Query(pkey)))
+      except NotImplementedError:
+        dsresults = []
+
 
     k = pkey
     n = int(numelems)
