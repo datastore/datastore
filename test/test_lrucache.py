@@ -43,7 +43,7 @@ class TestLRUCacheDatastore(TestDatastore):
     self.assertEqual(len(lru2), 0)
     self.assertEqual(len(lru3), 0)
 
-    self.test_simple(lrus)
+    self.subtest_simple(lrus)
 
 
 if __name__ == '__main__':

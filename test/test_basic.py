@@ -8,7 +8,7 @@ from datastore import Query
 
 class TestDatastore(unittest.TestCase):
 
-  def test_simple(self, stores=[], numelems=1000):
+  def subtest_simple(self, stores, numelems=1000):
 
     def checkLength(len):
       try:
@@ -17,11 +17,7 @@ class TestDatastore(unittest.TestCase):
       except TypeError, e:
         pass
 
-    if len(stores) == 0:
-      s1 = datastore.DictDatastore()
-      s2 = datastore.DictDatastore()
-      s3 = datastore.DictDatastore()
-      stores = [s1, s2, s3]
+    self.assertTrue(len(stores) > 0)
 
     pkey = Key('/dfadasfdsafdas/')
 
@@ -106,6 +102,19 @@ class TestDatastore(unittest.TestCase):
     checkLength(0)
 
 
+class TestDictionaryDatastore(TestDatastore):
+
+  def test_dictionary(self):
+
+    s1 = datastore.DictDatastore()
+    s2 = datastore.DictDatastore()
+    s3 = datastore.DictDatastore()
+    stores = [s1, s2, s3]
+
+    self.subtest_simple(stores)
+
+
+
 class TestDatastoreCollection(TestDatastore):
 
   def test_tiered(self):
@@ -169,7 +178,7 @@ class TestDatastoreCollection(TestDatastore):
     self.assertFalse(ts.contains(k2))
     self.assertFalse(ts.contains(k3))
 
-    self.test_simple([ts])
+    self.subtest_simple([ts])
 
   def test_sharded(self, numelems=1000):
 
@@ -286,7 +295,7 @@ class TestDatastoreCollection(TestDatastore):
       checkFor(key, value, sharded)
     self.assertEqual(sumlens(stores), 0)
 
-    self.test_simple([sharded])
+    self.subtest_simple([sharded])
 
 
 if __name__ == '__main__':

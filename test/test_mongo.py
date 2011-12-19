@@ -18,7 +18,7 @@ class TestMongoDatastore(TestDatastore):
 
   def test_mongo(self):
     ms = MongoDatastore(self.conn.datastore_testdb)
-    self.test_simple([ms], numelems=500)
+    self.subtest_simple([ms], numelems=500)
 
 
 if __name__ == '__main__':
