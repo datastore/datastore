@@ -11,9 +11,11 @@ different strengths without committing the application to one datastore
 throughout its lifetime.
 '''
 
+import key
 from key import Key
 from key import Namespace
 
+import basic
 from basic import Datastore
 from basic import DictDatastore
 
@@ -21,4 +23,6 @@ from basic import DatastoreCollection
 from basic import ShardedDatastore
 from basic import TieredDatastore
 
+import query
 from query import Query
+from query import Cursor
