@@ -131,9 +131,6 @@ class Key(object):
 
     '''
     if isinstance(other, Key):
-      print
-      print self._string + '/'
-      print other._string
       return other._string.startswith(self._string + '/')
     raise TypeError('%s is not of type %s' % (other, Key))
 
@@ -196,6 +193,6 @@ class Key(object):
   @classmethod
   def removeDuplicateSlashes(cls, path):
     '''Returns the path string `path` without duplicate slashes.'''
-    return '/'.join([''] + filter(lambda p: p != '', path.split('/')))
+    return '/' + '/'.join(filter(lambda p: p != '', path.split('/')))
 
 
