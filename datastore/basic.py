@@ -85,7 +85,7 @@ class Datastore(object):
     Returns:
       boalean whether the object exists
     '''
-    return bool(self.get(key))
+    return self.get(key) is not None
 
 
 
