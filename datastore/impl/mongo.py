@@ -1,11 +1,17 @@
 
-import bson
-import pymongo
-import datastore
-
-
 __version__ = '1.2'
 __author__ = 'Juan Batiz-Benet <jbenet@cs.stanford.edu>'
+__doc__ = '''
+MongoDB (pymongo) datastore implementation.
+
+Tested with:
+MongoDB 1.8.2
+pymongo 1.11+
+'''
+
+
+import pymongo
+import datastore
 
 
 class Doc(object):
