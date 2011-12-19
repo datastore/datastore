@@ -11,10 +11,12 @@ pylibmc 1.2.2
 
 '''
 
+#TODO: Implements queries using a key index.
+
 import datastore
 
 
-def responds_to_memcached_interface(client, interface=['set', 'get', 'delete']):
+def implements_memcached_interface(client, interface=['set', 'get', 'delete']):
   '''Verifies that the client responds to the basic memcached interface'''
 
   for method in interface:
@@ -35,7 +37,7 @@ class MemcachedDatastore(datastore.Datastore):
               so basic in order to work with any memcached client (or pool of
               clients).
     '''
-    responds_to_memcached_interface(client)
+    implements_memcached_interface(client)
     self.client = client
 
 
