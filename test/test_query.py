@@ -4,6 +4,7 @@ import unittest
 import hashlib
 import nanotime
 
+from datastore.key import Key
 from datastore.query import Filter, Order, Query, Cursor
 
 
@@ -342,9 +343,9 @@ class TestQuery(unittest.TestCase):
 
     now = nanotime.now().nanoseconds()
 
-    q1 = Query(limit=100)
-    q2 = Query(offset=200)
-    q3 = Query(object_getattr=getattr)
+    q1 = Query(Key('/'), limit=100)
+    q2 = Query(Key('/'), offset=200)
+    q3 = Query(Key('/'), object_getattr=getattr)
 
     q1.offset = 300
     q3.limit = 1
@@ -355,12 +356,12 @@ class TestQuery(unittest.TestCase):
     q2.order('key')
     q2.order('-created')
 
-    q1d = {'limit':100, 'offset':300, \
+    q1d = {'key': '/', 'limit':100, 'offset':300, \
       'filter': [['key', '>', '/ABC'], ['created', '>', now]] }
 
-    q2d = {'offset':200, 'order': ['+key', '-created'] }
+    q2d = {'key': '/', 'offset':200, 'order': ['+key', '-created'] }
 
-    q3d = {'limit':1}
+    q3d = {'key': '/', 'limit':1}
 
     self.assertEqual(q1.dict(), q1d)
     self.assertEqual(q2.dict(), q2d)
@@ -381,10 +382,12 @@ class TestQuery(unittest.TestCase):
 
   def test_cursor(self):
 
+    k = Key('/')
+
     self.assertRaises(ValueError, Cursor, None, None)
-    self.assertRaises(ValueError, Cursor, Query(), None)
+    self.assertRaises(ValueError, Cursor, Query(Key('/')), None)
     self.assertRaises(ValueError, Cursor, None, [1])
-    c = Cursor(Query(), [1, 2, 3, 4, 5]) # should not raise
+    c = Cursor(Query(k), [1, 2, 3, 4, 5]) # should not raise
 
     self.assertEqual(c.skipped, 0)
     self.assertEqual(c.returned, 0)
@@ -404,12 +407,12 @@ class TestQuery(unittest.TestCase):
     c._returned_inc(None)
     self.assertEqual(c.returned, 5)
 
-    self.subtest_cursor(Query(), [5, 4, 3, 2, 1], [5, 4, 3, 2, 1])
-    self.subtest_cursor(Query(limit=3), [5, 4, 3, 2, 1], [5, 4, 3])
-    self.subtest_cursor(Query(limit=0), [5, 4, 3, 2, 1], [])
-    self.subtest_cursor(Query(offset=2), [5, 4, 3, 2, 1], [3, 2, 1])
-    self.subtest_cursor(Query(offset=5), [5, 4, 3, 2, 1], [])
-    self.subtest_cursor(Query(limit=2, offset=2), [5, 4, 3, 2, 1], [3, 2])
+    self.subtest_cursor(Query(k), [5, 4, 3, 2, 1], [5, 4, 3, 2, 1])
+    self.subtest_cursor(Query(k, limit=3), [5, 4, 3, 2, 1], [5, 4, 3])
+    self.subtest_cursor(Query(k, limit=0), [5, 4, 3, 2, 1], [])
+    self.subtest_cursor(Query(k, offset=2), [5, 4, 3, 2, 1], [3, 2, 1])
+    self.subtest_cursor(Query(k, offset=5), [5, 4, 3, 2, 1], [])
+    self.subtest_cursor(Query(k, limit=2, offset=2), [5, 4, 3, 2, 1], [3, 2])
 
     v1, v2, v3 = version_objects()
     vs = [v1, v2, v3]
@@ -418,16 +421,16 @@ class TestQuery(unittest.TestCase):
     t2 = v2['committed']
     t3 = v3['committed']
 
-    self.subtest_cursor(Query(), vs, vs)
-    self.subtest_cursor(Query(limit=2), vs, [v1, v2])
-    self.subtest_cursor(Query(offset=1), vs, [v2, v3])
-    self.subtest_cursor(Query(offset=1, limit=1), vs, [v2])
+    self.subtest_cursor(Query(k), vs, vs)
+    self.subtest_cursor(Query(k, limit=2), vs, [v1, v2])
+    self.subtest_cursor(Query(k, offset=1), vs, [v2, v3])
+    self.subtest_cursor(Query(k, offset=1, limit=1), vs, [v2])
 
-    self.subtest_cursor(Query().filter('committed', '>=', t2), vs, [v2, v3])
-    self.subtest_cursor(Query().filter('committed', '<=', t1), vs, [v1])
+    self.subtest_cursor(Query(k).filter('committed', '>=', t2), vs, [v2, v3])
+    self.subtest_cursor(Query(k).filter('committed', '<=', t1), vs, [v1])
 
-    self.subtest_cursor(Query().order('+committed'), vs, [v1, v2, v3])
-    self.subtest_cursor(Query().order('-created'), vs, [v3, v2, v1])
+    self.subtest_cursor(Query(k).order('+committed'), vs, [v1, v2, v3])
+    self.subtest_cursor(Query(k).order('-created'), vs, [v3, v2, v1])
 
 
   def subtest_cursor(self, query, iterable, expected_results):

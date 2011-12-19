@@ -1,4 +1,6 @@
 
+from key import Key
+
 
 def _object_getattr(obj, field):
   '''Attribute getter for the objects to operate on.
@@ -58,6 +60,8 @@ def chain_gen(iterables):
   for iterable in iterables:
     for item in iterable:
       yield item
+
+
 
 
 class Filter(object):
@@ -227,7 +231,34 @@ class Query(object):
   '''Object attribute getter. Can be overridden to match client data model.'''
   object_getattr = staticmethod(_object_getattr)
 
-  def __init__(self, limit=None, offset=0, object_getattr=None):
+  def __init__(self, key, limit=None, offset=0, object_getattr=None):
+    ''' Initialize a query.
+
+    Parameters
+      key: a key representing the level of this query. For example, a Query with
+           Key('/MontyPython/Actor:') would query objects in that key path, eg:
+             Key('/MontyPython/Actor:JohnCleese')
+             Key('/MontyPython/Actor:EricIdle')
+             Key('/MontyPython/Actor:GrahamChapman')
+
+            It is up to datastores how to implement this namespacing. For example,
+            some datastores may store values in different tables or collections.
+
+      limit: an integer representing the maximum number of results to return.
+
+      offset: an integer representing a number of results to skip.
+
+      object_getattr: a function to extract attribute values from an object. It is
+           used to satisfy query filters and orders. Defining this function allows
+           the client to control the data model of the stored values. The default
+           function attempts to access values as attributes (__getattr__) or items
+           (__getitem__).
+    '''
+    if not isinstance(key, Key):
+      raise TypeError('key must be of type %s' % Key)
+
+    self.key = key
+
     self.limit = int(limit) if limit is not None else None
     self.offset = int(offset)
 
@@ -305,9 +336,9 @@ class Query(object):
   def copy(self):
     '''Returns a copy of this query.'''
     if self.object_getattr is Query.object_getattr:
-      other = Query()
+      other = Query(self.key)
     else:
-      other = Query(object_getattr=self.object_getattr)
+      other = Query(self.key, object_getattr=self.object_getattr)
     other.limit = self.limit
     other.offset = self.offset
     other.filters = self.filters
@@ -317,6 +348,7 @@ class Query(object):
   def dict(self):
     '''Returns a dictionary representing this query.'''
     d = dict()
+    d['key'] = str(self.key)
 
     if self.limit is not None:
       d['limit'] = self.limit
@@ -332,7 +364,8 @@ class Query(object):
   @classmethod
   def from_dict(cls, dictionary):
     '''Constructs a query from a dictionary.'''
-    query = cls()
+    query = cls(Key(dictionary['key']))
+
     for key, value in dictionary.items():
 
       if key == 'order':
@@ -348,6 +381,7 @@ class Query(object):
       elif key in ['limit', 'offset']:
         setattr(query, key, value)
     return query
+
 
 
 def is_iterable(obj):
