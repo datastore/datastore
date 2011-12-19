@@ -143,9 +143,17 @@ class DictDatastore(Datastore):
 
 
 
+class ShimDatastore(Datastore):
+  '''Represents a non-concrete datastore that adds functionality between the client
+  and a lower level datastore. Shim datastores do not actually store data themselves;
+  instead, they delegate storage to the underlying datastore.
+  '''
+  pass
 
 
-class DatastoreCollection(Datastore):
+
+
+class DatastoreCollection(ShimDatastore):
   '''Represents a collection of datastores.'''
 
   def __init__(self, stores=[]):
