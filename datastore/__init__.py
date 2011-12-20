@@ -17,9 +17,10 @@ from key import Namespace
 
 import basic
 from basic import Datastore
+from basic import ShimDatastore
 from basic import DictDatastore
 from basic import InterfaceMappingDatastore
-from basic import ShimDatastore
+
 from basic import DatastoreCollection
 from basic import ShardedDatastore
 from basic import TieredDatastore
@@ -27,3 +28,6 @@ from basic import TieredDatastore
 import query
 from query import Query
 from query import Cursor
+
+import serialize
+from serialize import SerializerShimDatastore

@@ -13,94 +13,34 @@ redis-py 2.4.10
 #TODO: Implement queries using a key index.
 #TODO: Implement TTL (and key configurations)
 
-import json
+
 import datastore
 
 
+class RedisDatastore(datastore.SerializerShimDatastore):
+  '''Simple redis datastore. Does not support queries.
 
-
-class NonSerializer(object):
-  '''Implements serializing protocol but does not serialize at all.
-  If only storing strings (or already-serialized values).
+  The redis interface is very similar to datastore's. The only differences are:
+  - values must be strings (SerializerShimDatastore)
+  - keys should be converted into strings (InterfaceMappingDatastore)
+  - `put` calls should be mapped to `set` (InterfaceMappingDatastore)
   '''
-  @staticmethod
-  def loads(value):
-    return value
 
-  @staticmethod
-  def dumps(value):
-    return value
-
-
-
-def implements_redis_interface(client, interface=['set', 'get', 'delete']):
-  '''Verifies that the client responds to the basic redis interface'''
-
-  for method in interface:
-    if not hasattr(client, method):
-      raise ValueError('client %s does not implement %s' % (client, method))
-
-
-
-
-class RedisDatastore(datastore.Datastore):
-  '''Simple redis datastore. Does not support queries.'''
-
-  # value serializer necessary because redis stores string values. clients can
-  # override this with their own custom serializer on a class-wide or per-
-  # instance basis. If you plan to store mostly strings, use NonSerializer
-  serializer = json
-
-  def __init__(self, client, serializer=None):
-    '''Initialize the datastore with given redis `client`.
+  def __init__(self, redis):
+    '''Initialize the datastore with given redis client `redis`.
 
     Args:
-      client: A redis client to use. Must implement the interface: set, get,
-              delete (del is reserved in python). This datastore keeps the
-              interface so basic in order to work with various libraries.
-
-      serializer: An optional value serializer to use instead of the default
-              (json). Serializer must respond to `loads` and `dumps`.
+      redis: A redis client to use. Must implement the basic redis
+          interface: set, get, delete. This datastore keeps the interface so
+          basic in order to work with any redis client (or pool of clients).
     '''
-    implements_redis_interface(client)
-    self.client = client
+    self._redis = redis
 
-    if serializer:
-      self.serializer = serializer
+    # use an InterfaceMappingDatastore to access the native redis interface
+    mapper = datastore.InterfaceMappingDatastore(redis, put='set', key=str)
 
-    # ensure serializer works
-    test = repr(self)
-    errstr = 'Serializer error: serialized value does not match original'
-    assert self.serializer.loads(self.serializer.dumps(test)) == test, errstr
-
-
-  def get(self, key):
-    '''Return the object named by key or None if it does not exist.
-    None takes the role of default value, so no KeyError exception is raised.
-
-    Args:
-      key: Key naming the object to retrieve
-
-    Returns:
-      object or None
-    '''
-    value = self.client.get(str(key))
-    if value:
-      value = self.serializer.loads(value)
-    return value
-
-
-  def put(self, key, value):
-    '''Stores the object `value` named by `key`.
-    How to serialize and store objects is up to the underlying datastore.
-    It is recommended to use simple objects (strings, numbers, lists, dicts).
-
-    Args:
-      key: Key naming `value`
-      value: the object to store.
-    '''
-    value = self.serializer.dumps(value)
-    self.client.set(str(key), value)
+    # initialize the SerializerShimDatastore with mapper as internal datastore
+    super(RedisDatastore, self).__init__(mapper)
 
   def delete(self, key):
     '''Removes the object named by `key`.
@@ -108,7 +48,8 @@ class RedisDatastore(datastore.Datastore):
     Args:
       key: Key naming the object to remove.
     '''
-    self.client.delete(str(key))
+    # SerializerShimDatastore does not implement delete. call mapper directly
+    self._datastore.delete(key)
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
@@ -124,9 +65,3 @@ class RedisDatastore(datastore.Datastore):
     '''
     #TODO: remember to deserialize values.
     raise NotImplementedError
-
-
-  def deserialize_gen(self, iterable):
-    '''Generator that deserializes objects from `iterable`.'''
-    for item in iterable:
-      yield self.serializer.loads(item)
