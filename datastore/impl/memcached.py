@@ -17,61 +17,26 @@ pylibmc 1.2.2
 import datastore
 
 
-def implements_memcached_interface(client, interface=['set', 'get', 'delete']):
-  '''Verifies that the client responds to the basic memcached interface'''
+class MemcachedDatastore(datastore.InterfaceMappingDatastore):
+  '''Flat memcached datastore. Does not support queries.
 
-  for method in interface:
-    if not hasattr(client, method):
-      raise ValueError('client %s does not implement %s' % (client, method))
+  This datastore is implemented as an InterfaceMappingDatastore, as the
+  memcached interface is very similar to datastore's.
 
+  The only differences (which InterfaceMappingDatastore takes care of) are:
+  - keys should be converted into strings
+  - `put` calls should be mapped to `set`
+  '''
 
-
-class MemcachedDatastore(datastore.Datastore):
-  '''Flat memcached datastore. Does not support queries.'''
-
-  def __init__(self, client):
-    '''Initialize the datastore with given memcached `client`.
-
-    Args:
-      client: A memcached client to use. Must implement the basic memcached
-              interface: set, get, delete. This datastore keeps the interface
-              so basic in order to work with any memcached client (or pool of
-              clients).
-    '''
-    implements_memcached_interface(client)
-    self.client = client
-
-
-  def get(self, key):
-    '''Return the object named by key or None if it does not exist.
-    None takes the role of default value, so no KeyError exception is raised.
+  def __init__(self, memcached):
+    '''Initialize the datastore with given memcached client `memcached`.
 
     Args:
-      key: Key naming the object to retrieve
-
-    Returns:
-      object or None
+      memcached: A memcached client to use. Must implement the basic memcached
+          interface: set, get, delete. This datastore keeps the interface so
+          basic in order to work with any memcached client (or pool of clients).
     '''
-    return self.client.get(str(key))
-
-  def put(self, key, value):
-    '''Stores the object `value` named by `key`.
-    How to serialize and store objects is up to the underlying datastore.
-    It is recommended to use simple objects (strings, numbers, lists, dicts).
-
-    Args:
-      key: Key naming `value`
-      value: the object to store.
-    '''
-    self.client.set(str(key), value)
-
-  def delete(self, key):
-    '''Removes the object named by `key`.
-
-    Args:
-      key: Key naming the object to remove.
-    '''
-    self.client.delete(str(key))
+    super(MemcachedDatastore, self).__init__(memcached, put='set', key=str)
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
