@@ -18,7 +18,8 @@ from key import Namespace
 import basic
 from basic import Datastore
 from basic import DictDatastore
-
+from basic import InterfaceMappingDatastore
+from basic import ShimDatastore
 from basic import DatastoreCollection
 from basic import ShardedDatastore
 from basic import TieredDatastore

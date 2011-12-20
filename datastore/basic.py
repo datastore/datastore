@@ -143,6 +143,74 @@ class DictDatastore(Datastore):
 
 
 
+
+class InterfaceMappingDatastore(Datastore):
+  '''Represents simple wrapper datastore around an object that, though not a
+  Datastore, implements data storage through a similar interface. For example,
+  memcached and redis both implement a `get`, `set`, `delete` interface.
+  '''
+
+  def __init__(self, service, get='get', put='put', delete='delete', key=str):
+    '''Initialize the datastore with given `service`.
+
+    Args:
+      service: A service that provides data storage through a similar interface
+          to Datastore. Using the service should only require a simple mapping
+          of methods, such as {put : set}.
+
+      get:    The attribute name of the `service` method implementing get
+      put:    The attribute name of the `service` method implementing put
+      delete: The attribute name of the `service` method implementing delete
+
+      key: A function converting a Datastore key (of type Key) into a `service`
+          key. The conversion will often be as simple as `str`.
+    '''
+    self._service = service
+    self._service_key = key
+
+    self._service_ops = {}
+    self._service_ops['get'] = getattr(service, get)
+    self._service_ops['put'] = getattr(service, put)
+    self._service_ops['delete'] = getattr(service, delete)
+    # AttributeError will be raised if service does not implement the interface
+
+
+  def get(self, key):
+    '''Return the object in `service` named by `key` or None.
+
+    Args:
+      key: Key naming the object to retrieve.
+
+    Returns:
+      object or None
+    '''
+    key = self._service_key(key)
+    return self._service_ops['get'](key)
+
+  def put(self, key, value):
+    '''Stores the object `value` named by `key` in `service`.
+
+    Args:
+      key: Key naming `value`.
+      value: the object to store.
+    '''
+    key = self._service_key(key)
+    self._service_ops['put'](key, value)
+
+  def delete(self, key):
+    '''Removes the object named by `key` in `service`.
+
+    Args:
+      key: Key naming the object to remove.
+    '''
+    key = self._service_key(key)
+    self._service_ops['delete'](key)
+
+
+
+
+
+
 class ShimDatastore(Datastore):
   '''Represents a non-concrete datastore that adds functionality between the
   client and a lower level datastore. Shim datastores do not actually store
