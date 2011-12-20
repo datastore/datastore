@@ -13,8 +13,8 @@ redis-py 2.4.10
 #TODO: Implement queries using a key index.
 #TODO: Implement TTL (and key configurations)
 
-import datastore
 import json
+import datastore
 
 
 
