@@ -214,11 +214,31 @@ class InterfaceMappingDatastore(Datastore):
 class ShimDatastore(Datastore):
   '''Represents a non-concrete datastore that adds functionality between the
   client and a lower level datastore. Shim datastores do not actually store
-  data themselves; instead, they delegate storage to the underlying datastore.
+  data themselves; instead, they delegate storage to an underlying child
+  datastore. The default implementation just passes all calls to the child.
   '''
-  pass
 
+  def __init__(self, datastore):
+    '''Initializes this ShimDatastore with child `datastore`.'''
 
+    if not isinstance(datastore, Datastore):
+      errstr = 'datastore must be of type %s. Got %s.'
+      raise TypeError(errstr % (Datastore, datastore))
+
+    self.child_datastore = datastore
+
+  # default implementation just passes all calls to child
+  def get(self, key):
+    return self.child_datastore.get(key)
+
+  def put(self, key, value):
+    self.child_datastore.put(key, value)
+
+  def delete(self, key):
+    self.child_datastore.delete(key)
+
+  def query(self, query):
+    return self.child_datastore.query(query)
 
 
 class DatastoreCollection(ShimDatastore):

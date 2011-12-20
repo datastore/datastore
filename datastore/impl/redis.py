@@ -49,7 +49,7 @@ class RedisDatastore(datastore.SerializerShimDatastore):
       key: Key naming the object to remove.
     '''
     # SerializerShimDatastore does not implement delete. call mapper directly
-    self._datastore.delete(key)
+    self.child_datastore.delete(key)
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
