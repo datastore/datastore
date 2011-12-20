@@ -12,6 +12,7 @@ pylibmc 1.2.2
 '''
 
 #TODO: Implements queries using a key index.
+#TODO: Implement TTL (and key configurations)
 
 import datastore
 
