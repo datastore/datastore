@@ -33,6 +33,9 @@ class RedisDatastore(datastore.ShimDatastore):
       redis: A redis client to use. Must implement the basic redis
           interface: set, get, delete. This datastore keeps the interface so
           basic in order to work with any redis client (or pool of clients).
+
+      serializer: An optional value serializer to use instead of the default.
+        Serializer must respond to `loads` and `dumps`.
     '''
     self._redis = redis
 
