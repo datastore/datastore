@@ -42,15 +42,6 @@ class RedisDatastore(datastore.SerializerShimDatastore):
     # initialize the SerializerShimDatastore with mapper as internal datastore
     super(RedisDatastore, self).__init__(mapper)
 
-  def delete(self, key):
-    '''Removes the object named by `key`.
-
-    Args:
-      key: Key naming the object to remove.
-    '''
-    # SerializerShimDatastore does not implement delete. call mapper directly
-    self.child_datastore.delete(key)
-
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
     Implementations of query will be the largest differentiating factor
