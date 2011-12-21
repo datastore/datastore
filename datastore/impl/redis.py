@@ -17,7 +17,7 @@ redis-py 2.4.10
 import datastore
 
 
-class RedisDatastore(datastore.SerializerShimDatastore):
+class RedisDatastore(datastore.ShimDatastore):
   '''Simple redis datastore. Does not support queries.
 
   The redis interface is very similar to datastore's. The only differences are:
@@ -26,7 +26,7 @@ class RedisDatastore(datastore.SerializerShimDatastore):
   - `put` calls should be mapped to `set` (InterfaceMappingDatastore)
   '''
 
-  def __init__(self, redis):
+  def __init__(self, redis, serializer=None):
     '''Initialize the datastore with given redis client `redis`.
 
     Args:
@@ -39,8 +39,11 @@ class RedisDatastore(datastore.SerializerShimDatastore):
     # use an InterfaceMappingDatastore to access the native redis interface
     mapper = datastore.InterfaceMappingDatastore(redis, put='set', key=str)
 
-    # initialize the SerializerShimDatastore with mapper as internal datastore
-    super(RedisDatastore, self).__init__(mapper)
+    # use a SerializerShimDatastore to ensure values are stringified
+    serial = datastore.SerializerShimDatastore(mapper, serializer=serializer)
+
+    # initialize ShimDatastore with serial as our child_datastore
+    super(RedisDatastore, self).__init__(serial)
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
