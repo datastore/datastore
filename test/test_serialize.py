@@ -86,13 +86,16 @@ class TestSerialize(TestDatastore):
       self.assertFalse(shim.contains(key))
       self.assertEqual(shim.get(key), None)
 
+    if serializer is not bson: # bson can't handle non mapping types
+      self.subtest_simple([shim], numelems)
+
   def test_serializer_shim(self):
 
     self.subtest_serializer_shim(json)
     self.subtest_serializer_shim(prettyjson)
     self.subtest_serializer_shim(pickle)
+    self.subtest_serializer_shim(map_serializer)
     self.subtest_serializer_shim(bson)
-
     self.subtest_serializer_shim(default_serializer) # module default
 
 

@@ -60,6 +60,24 @@ def serialized_gen(serializer, iterable):
 
 
 
+class map_serializer(Serializer):
+  '''map serializer that ensures the serialized value is a mapping type.'''
+
+  sentinel = '@wrapped'
+
+  @classmethod
+  def loads(cls, value):
+    if len(value) == 1 and cls.sentinel in value:
+      value = value[cls.sentinel]
+    return value
+
+  @classmethod
+  def dumps(cls, value):
+    if not hasattr(value, '__getitem__') or not hasattr(value, 'iteritems'):
+      value = {cls.sentinel: value}
+    return value
+
+
 class SerializerShimDatastore(ShimDatastore):
   '''Represents a Datastore that serializes and deserializes values.'''
 
