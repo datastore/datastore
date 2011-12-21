@@ -13,6 +13,7 @@ class Namespace(str):
   Namespace('Bruces')
   Namespace('Song:PhilosopherSong')
   '''
+  namespace_delimiter = ':'
 
   def __repr__(self):
     return "Namespace('%s')" % self
@@ -21,13 +22,13 @@ class Namespace(str):
   def field(self):
     '''returns the `field` part of this namespace, if any.'''
     if ':' in self:
-      return self.split(':')[0]
+      return self.split(self.namespace_delimiter)[0]
     return ''
 
   @property
   def value(self):
     '''returns the `value` part of this namespace.'''
-    return self.split(':')[-1]
+    return self.split(self.namespace_delimiter)[-1]
 
 
 
