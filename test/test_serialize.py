@@ -27,7 +27,7 @@ class TestSerialize(TestDatastore):
 
     value = 'test_value_%s' % self
     values_raw = [{'value': i} for i in xrange(0, 1000)]
-    values_json = [json.dumps(v) for v in values_raw]
+    values_json = map(json.dumps, values_raw)
 
     # test protocol
     self.assertRaises(NotImplementedError, Serializer.loads, value)
@@ -45,12 +45,18 @@ class TestSerialize(TestDatastore):
     self.assertEqual(values_serialized, values_json)
     self.assertEqual(values_deserialized, values_raw)
 
-  def subtest_serializer_shim(self, serializer):
+    # test stack
+    stack = Stack([json, map_serializer, bson])
+    values_serialized = map(stack.dumps, values_raw)
+    values_deserialized = map(stack.loads, values_serialized)
+    self.assertEqual(values_deserialized, values_raw)
+
+  def subtest_serializer_shim(self, serializer, numelems=100):
 
     child = datastore.DictDatastore()
     shim = SerializerShimDatastore(child, serializer=serializer)
 
-    values_raw = [{'value': i} for i in xrange(0, 1000)]
+    values_raw = [{'value': i} for i in xrange(0, numelems)]
 
     values_serial = [serializer.dumps(v) for v in values_raw]
     values_deserial = [serializer.loads(v) for v in values_serial]
@@ -97,6 +103,12 @@ class TestSerialize(TestDatastore):
     self.subtest_serializer_shim(map_serializer)
     self.subtest_serializer_shim(bson)
     self.subtest_serializer_shim(default_serializer) # module default
+
+    self.subtest_serializer_shim(Stack([map_serializer]))
+    self.subtest_serializer_shim(Stack([map_serializer, bson]))
+    self.subtest_serializer_shim(Stack([json, map_serializer, bson]))
+    self.subtest_serializer_shim(Stack([json, map_serializer, bson, pickle]))
+
 
 
 if __name__ == '__main__':

@@ -78,6 +78,21 @@ class map_serializer(Serializer):
     return value
 
 
+class Stack(Serializer, list):
+  '''represents a stack of serializers, applying each object in a row.'''
+
+  def loads(self, value):
+    for serializer in reversed(self):
+      value = serializer.loads(value)
+    return value
+
+  def dumps(self, value):
+    for serializer in self:
+      value = serializer.dumps(value)
+    return value
+
+
+
 class SerializerShimDatastore(ShimDatastore):
   '''Represents a Datastore that serializes and deserializes values.'''
 
