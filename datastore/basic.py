@@ -1,12 +1,6 @@
 
 from query import Cursor
 
-try:
-  from collections import OrderedDict
-except ImportError:
-  from ordereddict import OrderedDict
-
-
 class Datastore(object):
   '''A Datastore represents storage for any key-value pair.
 
@@ -91,15 +85,15 @@ class Datastore(object):
 
 
 class DictDatastore(Datastore):
-  '''Simple straw-man in-memory datastore backed by a dict.'''
+  '''Simple straw-man in-memory datastore backed by nested dicts.'''
 
   def __init__(self):
-    self._items = OrderedDict()
+    self._items = dict()
 
   def _collection(self, key):
     collection = str(key.path)
     if not collection in self._items:
-      self._items[collection] = OrderedDict()
+      self._items[collection] = dict()
     return self._items[collection]
 
   def get(self, key):
