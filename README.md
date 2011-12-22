@@ -24,6 +24,53 @@ throughout its lifetime. It looks like this:
 In addition, grouped datastores significantly simplify interesting data access
 patterns (such as caching and sharding).
 
+## Install
+
+For now, until datastore is well-tested and added to pypi:
+
+        git clone https://github.com/jbenet/datastore/
+        cd datastore
+        sudo python setup.py install
+
+
+### Hello World
+
+    >>> import datastore
+    >>> ds = datastore.basic.DictDatastore()
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+
+## About
+
+### Documentation
+
+The documentation can be found at:
+http://readthedocs.org/docs/datastore/en/latest/
+
+### License
+
+datastore is under the MIT License.
+
+### Contact
+
+datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
+was originally part of [py-dronestore](https://github.com/jbenet/py-dronestore).
+On December 2011, it was re-written as a standalone project.
+
+Project Homepage:
+[https://github.com/jbenet/datastore](https://github.com/jbenet/datastore)
+
+Feel free to contact me. But please file issues in github first. Cheers!
+
+
 ## API
 
 The datastore API places an emphasis on  **simplicity** and elegance. Only four
@@ -102,50 +149,4 @@ include the object type:
     Key('/Comedy/MontyPython/Actor:JohnCleese')
     Key('/Comedy/MontyPython/Sketch:CheeseShop')
     Key('/Comedy/MontyPython/Sketch:CheeseShop/Character:Mousebender')
-
-
-## Install
-
-For now, until datastore is well-tested and added to pypi:
-
-        git clone https://github.com/jbenet/datastore/
-        cd datastore
-        sudo python setup.py install
-
-
-## Hello World
-
-    >>> import datastore
-    >>> ds = datastore.basic.DictDatastore()
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
-## Other
-
-### Documentation
-
-The documentation can be found at:
-http://readthedocs.org/docs/datastore/en/latest/
-
-### License
-
-datastore is under the MIT License.
-
-### About
-
-datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
-was originally part of [py-dronestore](https://github.com/jbenet/py-dronestore).
-On December 2011, it was re-written as a standalone project.
-
-Project Homepage:
-[https://github.com/jbenet/datastore](https://github.com/jbenet/datastore)
-
-Feel free to contact me. But please file issues in github first. Cheers!
 
