@@ -47,9 +47,10 @@ class MongoDatastore(datastore.Datastore):
     '''Returns the name of the collection to house objects with `key`.
     Users can override this function to enforce their own collection naming.
     '''
-    name = str(key.path)[1:] # remove first slash.
-    name = name.replace(':', '_')
-    name = name.replace('/', '.')
+    name = str(key.path)[1:]        # remove first slash.
+    name = name.replace(':', '_')   # no : allowed in collection names, use _
+    name = name.replace('/', '.')   # no / allowed in collection names, use .
+    name = name or '_'              # if collection name is empty, use _
     return name
 
 
