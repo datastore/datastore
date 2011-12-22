@@ -113,10 +113,6 @@ For now, until datastore is well-tested and added to pypi:
         sudo python setup.py install
 
 
-## License
-
-datastore is under the MIT License.
-
 ## Hello World
 
     >>> import datastore
@@ -130,3 +126,26 @@ datastore is under the MIT License.
     >>> ds.delete(hello)
     >>> ds.get(hello)
     None
+
+## Other
+
+### Documentation
+
+The documentation can be found at:
+http://readthedocs.org/docs/datastore/en/latest/
+
+### License
+
+datastore is under the MIT License.
+
+### About
+
+datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
+was originally part of [py-dronestore](https://github.com/jbenet/py-dronestore).
+On December 2011, it was re-written as a standalone project.
+
+Project Homepage:
+[https://github.com/jbenet/datastore](https://github.com/jbenet/datastore)
+
+Feel free to contact me. But please file issues in github first. Cheers!
+
