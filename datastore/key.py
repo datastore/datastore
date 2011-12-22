@@ -122,7 +122,7 @@ class Key(object):
     '''Returns the child Key by appending namespace `other`.
 
     For example:
-    >>> Key('/Comedy/MontyPython').child('Actor:JognCleese')
+    >>> Key('/Comedy/MontyPython').child('Actor:JohnCleese')
     Key('/Comedy/MontyPython/Actor:JohnCleese')
 
     '''
