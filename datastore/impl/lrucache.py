@@ -1,12 +1,12 @@
 
 import pylru
-from datastore import basic
+import datastore
 
 __version__ = '1.0'
 __author__ = 'Juan Batiz-Benet <jbenet@cs.stanford.edu>'
 
 
-class LRUCache(basic.Datastore):
+class LRUCache(datastore.Datastore):
   '''Represents an LRU cache datastore, backed by pylru.'''
 
   def __init__(self, size):
