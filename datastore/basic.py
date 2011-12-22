@@ -68,7 +68,7 @@ class Datastore(object):
       query: Query object describing the objects to return.
 
     Raturns:
-      Cursor with all objects matching criteria
+      iterable cursor with all objects matching criteria
     '''
     raise NotImplementedError
 
