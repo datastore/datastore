@@ -56,10 +56,17 @@ License
 datastore is under the MIT Licence
 
 
-Author
+Contact
 ------
 
-Juan Batiz-Benet
+datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
+was originally part of `py-dronestore <https://github.com/jbenet/py-dronestore>`_
+On December 2011, it was re-written as a standalone project.
+
+Project Homepage: https://github.com/jbenet/datastore
+
+Feel free to contact me. But please file issues in github first. Cheers!
+
 
 
 Indices and tables
