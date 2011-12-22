@@ -57,7 +57,7 @@ datastore is under the MIT Licence
 
 
 Contact
-------
+-------
 
 datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
 was originally part of `py-dronestore <https://github.com/jbenet/py-dronestore>`_
