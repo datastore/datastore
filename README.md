@@ -53,7 +53,7 @@ For now, until datastore is well-tested and added to pypi:
 ### Documentation
 
 The documentation can be found at:
-http://readthedocs.org/docs/datastore/en/latest/
+http://juanbb.com/docs/datastore/
 
 ### License
 
