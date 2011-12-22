@@ -174,6 +174,8 @@ class FileSystemDatastore(datastore.Datastore):
     if os.path.exists(path):
       os.remove(path)
 
+    #TODO: delete dirs if empty?
+
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
     FSDatastore.query queries all the `.obj` files within the directory
