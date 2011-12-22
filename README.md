@@ -28,9 +28,9 @@ patterns (such as caching and sharding).
 
 For now, until datastore is well-tested and added to pypi:
 
-        git clone https://github.com/jbenet/datastore/
-        cd datastore
-        sudo python setup.py install
+    git clone https://github.com/jbenet/datastore/
+    cd datastore
+    sudo python setup.py install
 
 
 ### Hello World
