@@ -179,7 +179,7 @@ class Key(object):
 
   def __cmp__(self, other):
     if isinstance(other, Key):
-      return cmp(self._str, other._str)
+      return cmp(self._string, other._string)
     raise TypeError('other is not of type %s' % Key)
 
   def __eq__(self, other):

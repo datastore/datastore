@@ -32,6 +32,10 @@ class KeyTests(unittest.TestCase):
     self.assertEqual(Key(string).path, Key(path))
     self.assertEqual(Key(string), eval(repr(Key(string))))
 
+    self.assertTrue(Key(string).child('a') > Key(string))
+    self.assertTrue(Key(string).child('a') < Key(string).child('b'))
+    self.assertTrue(Key(string) == Key(string))
+
     self.assertRaises(TypeError, cmp, Key(string), string)
 
     split = fixedString.split('/')
