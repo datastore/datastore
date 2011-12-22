@@ -108,9 +108,9 @@ include the object type:
 
 For now, until datastore is well-tested and added to pypi:
 
-    git clone https://github.com/jbenet/datastore/
-    cd datastore
-    sudo python setup.py install
+        git clone https://github.com/jbenet/datastore/
+        cd datastore
+        sudo python setup.py install
 
 
 ## License
@@ -130,4 +130,3 @@ datastore is under the MIT License.
     >>> ds.delete(hello)
     >>> ds.get(hello)
     None
-

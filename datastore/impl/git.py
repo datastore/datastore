@@ -5,14 +5,15 @@ __doc__ = '''
 git datastore implementation.
 
 Tested with:
-git 1.7.5.4
+  * git 1.7.5.4
+
 '''
 
 
 import os
 import subprocess
 
-from datastore.impl.filesystem import FSDatastore
+from datastore.impl.filesystem import FileSystemDatastore
 from datastore.serialize import prettyjson
 
 
@@ -101,8 +102,8 @@ class git_dulwich_interface(git_interface):
 
 
 
-class GitDatastore(FSDatastore):
-  '''git version controlled datastore, on top of FSDatastore.'''
+class GitDatastore(FileSystemDatastore):
+  '''git version controlled datastore, on top of FileSystemDatastore.'''
 
   git_interface = git_dulwich_interface if dulwich else git_cli_interface
 

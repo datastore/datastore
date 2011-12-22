@@ -5,8 +5,9 @@ __doc__ = '''
 MongoDB (pymongo) datastore implementation.
 
 Tested with:
-MongoDB 1.8.2
-pymongo 1.11+
+  * MongoDB 1.8.2
+  * pymongo 1.11+
+
 '''
 
 

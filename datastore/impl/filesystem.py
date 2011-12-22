@@ -5,7 +5,7 @@ __doc__ = '''
 filesystem datastore implementation.
 
 Tested with:
-Journaled HFS+ (Mac OS X 10.7.2)
+  * Journaled HFS+ (Mac OS X 10.7.2)
 
 '''
 
@@ -24,24 +24,24 @@ def ensure_directory_exists(directory):
 
 
 
-class FSDatastore(datastore.Datastore):
+class FileSystemDatastore(datastore.Datastore):
   '''Simple flat-file datastore.
 
-  FSDatastore will store objects in independent files in the host's filesystem.
-  The FSDatastore is initialized with a `root` path, under which to store all
-  objects. Each object will be stored under its own file: `root`/`key`.obj
+  FileSystemDatastore will store objects in independent files in the host's
+  filesystem. The FileSystemDatastore is initialized with a `root` path, under
+  which to store all objects. Each object will be stored under its own file:
+  `root`/`key`.obj
 
   The `key` portion also replaces namespace parameter delimiters (:) with
   slashes, creating several nested directories. For example, storing objects
-  under `root` path '/data' with the following keys:
-
+  under `root` path '/data' with the following keys::
 
     Key('/Comedy:MontyPython/Actor:JohnCleese')
     Key('/Comedy:MontyPython/Sketch:ArgumentClinic')
     Key('/Comedy:MontyPython/Sketch:CheeseShop')
     Key('/Comedy:MontyPython/Sketch:CheeseShop/Character:Mousebender')
 
-  will yield the file structure:
+  will yield the file structure::
 
     /data/Comedy/MontyPython/Actor/JohnCleese.obj
     /data/Comedy/MontyPython/Sketch/ArgumentClinic.obj
@@ -50,17 +50,17 @@ class FSDatastore(datastore.Datastore):
 
   Implementation Notes:
     Separating key namespaces (and their parameters) within directories allows
-    granular querying for under a specific key. For example, a query with key:
+    granular querying for under a specific key. For example, a query with key::
 
       Key('/data/Comedy:MontyPython/Sketch:CheeseShop')
 
     will query for all objects under `Sketch:CheeseShop` independently of
-    queries for:
+    queries for::
 
       Key('/data/Comedy:MontyPython/Sketch')
 
     Also, using the `.obj` extension gets around the ambiguity of having both a
-    `CheeseShop` object and directory:
+    `CheeseShop` object and directory::
 
       /data/Comedy/MontyPython/Sketch/CheeseShop.obj
       /data/Comedy/MontyPython/Sketch/CheeseShop/

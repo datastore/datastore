@@ -5,9 +5,9 @@ __doc__ = '''
 memcached datastore implementation.
 
 Tested with:
-memcached 1.4.5
-libmemcached 0.50
-pylibmc 1.2.2
+  * memcached 1.4.5
+  * libmemcached 0.50
+  * pylibmc 1.2.2
 
 '''
 
@@ -40,9 +40,6 @@ class MemcachedDatastore(datastore.InterfaceMappingDatastore):
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
-    Implementations of query will be the largest differentiating factor
-    amongst datastores. All datastores **must** implement query, even using
-    query's worst case scenario, see Query class for details.
 
     Args:
       query: Query object describing the objects to return.
@@ -50,4 +47,5 @@ class MemcachedDatastore(datastore.InterfaceMappingDatastore):
     Raturns:
       Cursor with all objects matching criteria
     '''
+    #TODO
     raise NotImplementedError

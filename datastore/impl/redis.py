@@ -5,8 +5,8 @@ __doc__ = '''
 redis datastore implementation.
 
 Tested with:
-redis 2.2.12
-redis-py 2.4.10
+* redis 2.2.12
+* redis-py 2.4.10
 
 '''
 
@@ -50,9 +50,6 @@ class RedisDatastore(datastore.ShimDatastore):
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
-    Implementations of query will be the largest differentiating factor
-    amongst datastores. All datastores **must** implement query, even using
-    query's worst case scenario, see Query class for details.
 
     Args:
       query: Query object describing the objects to return.
@@ -60,5 +57,5 @@ class RedisDatastore(datastore.ShimDatastore):
     Raturns:
       Cursor with all objects matching criteria
     '''
-    #TODO: remember to deserialize values.
+    #TODO
     raise NotImplementedError

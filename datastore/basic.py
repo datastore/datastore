@@ -23,6 +23,7 @@ class Datastore(object):
 
   def get(self, key):
     '''Return the object named by key or None if it does not exist.
+
     None takes the role of default value, so no KeyError exception is raised.
 
     Args:
@@ -35,6 +36,7 @@ class Datastore(object):
 
   def put(self, key, value):
     '''Stores the object `value` named by `key`.
+
     How to serialize and store objects is up to the underlying datastore.
     It is recommended to use simple objects (strings, numbers, lists, dicts).
 
@@ -54,9 +56,10 @@ class Datastore(object):
 
   def query(self, query):
     '''Returns an iterable of objects matching criteria expressed in `query`
+
     Implementations of query will be the largest differentiating factor
     amongst datastores. All datastores **must** implement query, even using
-    query's worst case scenario, see Query class for details.
+    query's worst case scenario, see :ref:class:`Query` for details.
 
     Args:
       query: Query object describing the objects to return.
@@ -70,6 +73,7 @@ class Datastore(object):
 
   def contains(self, key):
     '''Returns whether the object named by `key` exists.
+
     The default implementation pays the cost of a get. Some datastore
     implementations may optimize this.
 
@@ -91,27 +95,50 @@ class DictDatastore(Datastore):
     self._items = dict()
 
   def _collection(self, key):
+    '''Returns the namespace collection for `key`.'''
     collection = str(key.path)
     if not collection in self._items:
       self._items[collection] = dict()
     return self._items[collection]
 
   def get(self, key):
-    '''Return the object named by key.'''
+    '''Return the object named by `key` or None.
+
+    Retrieves the object from the collection corresponding to ``key.path``.
+
+    Args:
+      key: Key naming the object to retrieve.
+
+    Returns:
+      object or None
+    '''
     try:
       return self._collection(key)[key]
     except KeyError, e:
       return None
 
   def put(self, key, value):
-    '''Stores the object.'''
+    '''Stores the object `value` named by `key`.
+
+    Stores the object in the collection corresponding to ``key.path``.
+
+    Args:
+      key: Key naming `value`
+      value: the object to store.
+    '''
     if value is None:
       self.delete(key)
     else:
       self._collection(key)[key] = value
 
   def delete(self, key):
-    '''Removes the object.'''
+    '''Removes the object named by `key`.
+
+    Removes the object from the collection corresponding to ``key.path``.
+
+    Args:
+      key: Key naming the object to remove.
+    '''
     try:
       del self._collection(key)[key]
 
@@ -121,11 +148,32 @@ class DictDatastore(Datastore):
       pass
 
   def contains(self, key):
-    '''Returns whether the object is in this datastore.'''
+    '''Returns whether the object named by `key` exists.
+
+    Checks for the object in the collection corresponding to ``key.path``.
+
+    Args:
+      key: Key naming the object to check.
+
+    Returns:
+      boalean whether the object exists
+    '''
+
     return key in self._collection(key)
 
   def query(self, query):
-    '''Returns a sequence of objects matching criteria expressed in `query`'''
+    '''Returns an iterable of objects matching criteria expressed in `query`
+
+    Naively applies the query operations on the objects within the namespaced
+    collection corresponding to ``query.key.path``.
+
+    Args:
+      query: Query object describing the objects to return.
+
+    Raturns:
+      iterable cursor with all objects matching criteria
+    '''
+
     # entire dataset already in memory, so ok to apply query naively
     if str(query.key) in self._items:
       return query(self._items[str(query.key)].values())
@@ -223,15 +271,67 @@ class ShimDatastore(Datastore):
 
   # default implementation just passes all calls to child
   def get(self, key):
+    '''Return the object named by key or None if it does not exist.
+
+    Default shim implementation simply returns ``child_datastore.get(key)``
+    Override to provide different functionality, for example::
+
+        def get(self, key):
+          value = self.child_datastore.get(key)
+          return json.loads(value)
+
+    Args:
+      key: Key naming the object to retrieve
+
+    Returns:
+      object or None
+    '''
     return self.child_datastore.get(key)
 
   def put(self, key, value):
+    '''Stores the object `value` named by `key`.
+
+    Default shim implementation simply calls ``child_datastore.put(key, value)``
+    Override to provide different functionality, for example::
+
+        def put(self, key, value):
+          value = json.dumps(value)
+          self.child_datastore.put(key, value)
+
+    Args:
+      key: Key naming `value`.
+      value: the object to store.
+    '''
     self.child_datastore.put(key, value)
 
   def delete(self, key):
+    '''Removes the object named by `key`.
+
+    Default shim implementation simply calls ``child_datastore.delete(key)``
+    Override to provide different functionality.
+
+    Args:
+      key: Key naming the object to remove.
+    '''
     self.child_datastore.delete(key)
 
   def query(self, query):
+    '''Returns an iterable of objects matching criteria expressed in `query`.
+
+    Default shim implementation simply returns ``child_datastore.query(query)``
+    Override to provide different functionality, for example::
+
+        def query(self, query):
+          cursor = self.child_datastore.query(query)
+          cursor._iterable = deserialized(cursor._iterable)
+          return cursor
+
+    Args:
+      query: Query object describing the objects to return.
+
+    Raturns:
+      iterable cursor with all objects matching criteria
+    '''
     return self.child_datastore.query(query)
 
 
@@ -250,18 +350,22 @@ class DatastoreCollection(ShimDatastore):
     self._stores = stores
 
   def datastore(self, index):
+    '''Returns the datastore at `index`.'''
     return self._stores[index]
 
   def appendDatastore(self, store):
+    '''Appends datastore `store` to this collection.'''
     if not isinstance(store, Datastore):
       raise TypeError("stores must be of type %s" % Datastore)
 
     self._stores.append(store)
 
   def removeDatastore(self, store):
+    '''Removes datastore `store` from this collection.'''
     self._stores.remove(store)
 
   def insertDatastore(self, index, store):
+    '''Inserts datastore `store` into this collection at `index`.'''
     if not isinstance(store, Datastore):
       raise TypeError("stores must be of type %s" % Datastore)
 
@@ -278,19 +382,19 @@ class TieredDatastore(DatastoreCollection):
   order in terms of speed (i.e. read caches first).
 
   Datastores should be arranged in order of completeness, with the most complete
-  datastore last.
+  datastore last, as it will handle query calls.
 
   Semantics:
-    get      : returns first found value
-    put      : writes through to all
-    delete   : deletes through to all
-    contains : returns first found value
-    query    : queries bottom (most complete) datastore
+    * get      : returns first found value
+    * put      : writes through to all
+    * delete   : deletes through to all
+    * contains : returns first found value
+    * query    : queries bottom (most complete) datastore
 
   '''
 
   def get(self, key):
-    '''Return the object named by key.'''
+    '''Return the object named by key. Checks each datastore in order.'''
     value = None
     for store in self._stores:
       value = store.get(key)
@@ -307,14 +411,22 @@ class TieredDatastore(DatastoreCollection):
     return value
 
   def put(self, key, value):
-    '''Stores the object in all stores.'''
+    '''Stores the object in all underlying datastores.'''
     for store in self._stores:
       store.put(key, value)
 
   def delete(self, key):
-    '''Removes the object from all stores.'''
+    '''Removes the object from all underlying datastores.'''
     for store in self._stores:
       store.delete(key)
+
+  def query(self, query):
+    '''Returns a sequence of objects matching criteria expressed in `query`.
+    The last datastore will handle all query calls, as it has a (if not
+    the only) complete record of all objects.
+    '''
+    # queries hit the last (most complete) datastore
+    return self._stores[-1].query(query)
 
   def contains(self, key):
     '''Returns whether the object is in this datastore.'''
@@ -323,20 +435,15 @@ class TieredDatastore(DatastoreCollection):
         return True
     return False
 
-  def query(self, query):
-    '''Returns a sequence of objects matching criteria expressed in `query`'''
-    # queries hit the last (most complete) datastore
-    return self._stores[-1].query(query)
-
 
 
 
 
 class ShardedDatastore(DatastoreCollection):
   '''Represents a collection of datastore shards.
-  A datastore is selected based on a sharding function.
 
-  sharding functions should take a Key and return an integer.
+  A datastore is selected based on a sharding function.
+  Sharding functions should take a Key and return an integer.
 
   WARNING: adding or removing datastores while mid-use may severely affect
            consistency. Also ensure the order is correct upon initialization.
@@ -355,9 +462,11 @@ class ShardedDatastore(DatastoreCollection):
 
 
   def shard(self, key):
+    '''Returns the shard index to handle `key`, according to sharding fn.'''
     return self._shardingfn(key) % len(self._stores)
 
   def shardDatastore(self, key):
+    '''Returns the shard to handle `key`.'''
     return self.datastore(self.shard(key))
 
 

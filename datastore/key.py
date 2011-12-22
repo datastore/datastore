@@ -9,9 +9,11 @@ class Namespace(str):
 
   A namespace can optionally include a field (delimited by ':')
 
-  Example namespaces:
-  Namespace('Bruces')
-  Namespace('Song:PhilosopherSong')
+  Example namespaces::
+
+      Namespace('Bruces')
+      Namespace('Song:PhilosopherSong')
+
   '''
   namespace_delimiter = ':'
 
@@ -41,18 +43,18 @@ class Key(object):
 
   Keys are meant to be unique across a system. Keys are hierarchical,
   incorporating more and more specific namespaces. Thus keys can be deemed
-  'children' or 'ancestors' of other keys.
+  'children' or 'ancestors' of other keys::
 
-  Key('/Comedy')
-  Key('/Comedy/MontyPython')
+      Key('/Comedy')
+      Key('/Comedy/MontyPython')
 
   Also, every namespace can be parametrized to embed relevant object
   information. For example, the Key `name` (most specific namespace) could
-  include the object type:
+  include the object type::
 
-  Key('/Comedy/MontyPython/Actor:JohnCleese')
-  Key('/Comedy/MontyPython/Sketch:CheeseShop')
-  Key('/Comedy/MontyPython/Sketch:CheeseShop/Character:Mousebender')
+      Key('/Comedy/MontyPython/Actor:JohnCleese')
+      Key('/Comedy/MontyPython/Sketch:CheeseShop')
+      Key('/Comedy/MontyPython/Sketch:CheeseShop/Character:Mousebender')
 
   '''
 
@@ -109,9 +111,8 @@ class Key(object):
   def parent(self):
     '''Returns the parent Key (all namespaces except the last).
 
-    For example:
-    >>> Key('/Comedy/MontyPython/Actor:JohnCleese').parent
-    Key('/Comedy/MontyPython')
+        >>> Key('/Comedy/MontyPython/Actor:JohnCleese').parent
+        Key('/Comedy/MontyPython')
 
     '''
     if '/' in self._string:
@@ -121,9 +122,8 @@ class Key(object):
   def child(self, other):
     '''Returns the child Key by appending namespace `other`.
 
-    For example:
-    >>> Key('/Comedy/MontyPython').child('Actor:JohnCleese')
-    Key('/Comedy/MontyPython/Actor:JohnCleese')
+        >>> Key('/Comedy/MontyPython').child('Actor:JohnCleese')
+        Key('/Comedy/MontyPython/Actor:JohnCleese')
 
     '''
     return Key('%s/%s' % (self._string, str(other)))
@@ -132,8 +132,9 @@ class Key(object):
   def isAncestorOf(self, other):
     '''Returns whether this Key is an ancestor of `other`.
 
-    >>> Key('/Comedy').isAncestorOf(Key('/Comedy/MontyPython/Actor:JohnCleese'))
-    True
+        >>> john = Key('/Comedy/MontyPython/Actor:JohnCleese')
+        >>> Key('/Comedy').isAncestorOf(john)
+        True
 
     '''
     if isinstance(other, Key):
@@ -143,8 +144,8 @@ class Key(object):
   def isDescendantOf(self, other):
     '''Returns whether this Key is a descendant of `other`.
 
-    >>> Key('/Comedy/MontyPython').isDescendantOf(Key('/Comedy'))
-    True
+        >>> Key('/Comedy/MontyPython').isDescendantOf(Key('/Comedy'))
+        True
 
     '''
     if isinstance(other, Key):
