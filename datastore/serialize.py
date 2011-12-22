@@ -142,3 +142,8 @@ class SerializerShimDatastore(ShimDatastore):
     cursor._iterable = deserialized_gen(self.serializer, cursor._iterable)
 
     return cursor
+
+
+def shim(datastore, serializer=None):
+  '''Return a SerializerShimDatastore wrapping `datastore`'''
+  return SerializerShimDatastore(datastore, serializer=serializer)
