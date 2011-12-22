@@ -49,3 +49,25 @@ class MemcachedDatastore(datastore.InterfaceMappingDatastore):
     '''
     #TODO
     raise NotImplementedError
+
+'''
+Hello World:
+
+    >>> import pylibmc
+    >>> import datastore
+    >>> from datastore.impl.memcached import MemcachedDatastore
+    >>>
+    >>> mc = pylibmc.Client(['127.0.0.1'])
+    >>> ds = MemcachedDatastore(mc)
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''

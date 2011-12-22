@@ -216,3 +216,24 @@ def shim(datastore, serializer=None):
 
   '''
   return SerializerShimDatastore(datastore, serializer=serializer)
+
+'''
+Hello World:
+
+    >>> import datastore
+    >>> import json
+    >>>
+    >>> ds_child = datastore.DictDatastore()
+    >>> ds = datastore.serialize.shim(ds_child, json)
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''

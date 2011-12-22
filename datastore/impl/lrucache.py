@@ -42,3 +42,24 @@ class LRUCache(datastore.Datastore):
     '''Returns a sequence of objects matching criteria expressed in `query`'''
     # entire dataset already in memory, so ok to apply query naively
     return query(self._cache.values())
+
+
+'''
+Hello World:
+
+    >>> import datastore
+    >>> from datastore.impl.lrucache import LRUCache
+    >>>
+    >>> ds = LRUCache(100)
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''

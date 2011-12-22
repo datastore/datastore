@@ -210,3 +210,25 @@ class FileSystemDatastore(datastore.Datastore):
     '''
     path = self.object_path(key)
     return os.path.exists(path) and os.path.isfile(path)
+
+
+
+'''
+Hello World:
+
+    >>> import datastore
+    >>> from datastore.impl.filesystem import FileSystemDatastore
+    >>>
+    >>> ds = FileSystemDatastore('/tmp/.test_datastore')
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''

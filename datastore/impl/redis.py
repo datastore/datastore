@@ -59,3 +59,25 @@ class RedisDatastore(datastore.ShimDatastore):
     '''
     #TODO
     raise NotImplementedError
+
+
+'''
+Hello World:
+
+    >>> import redis
+    >>> import datastore
+    >>> from datastore.impl.redis import RedisDatastore
+    >>> r = redis.Redis()
+    >>> ds = RedisDatastore(r)
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''

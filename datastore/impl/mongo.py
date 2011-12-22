@@ -170,3 +170,26 @@ class MongoQuery(object):
     keys = [cls.field(o.field) for o in orders]
     vals = [1 if o.isAscending() else -1 for o in orders]
     return zip(keys, vals)
+
+
+'''
+Hello World:
+
+    >>> import pymongo
+    >>> import datastore
+    >>> from datastore.impl.mongo import MongoDatastore
+    >>>
+    >>> conn = pymongo.Connection()
+    >>> ds = MongoDatastore(conn.test_db)
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''
