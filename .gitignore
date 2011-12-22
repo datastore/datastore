@@ -1,1 +1,4 @@
 *.pyc
+build/
+datastore.egg-info
+dist
