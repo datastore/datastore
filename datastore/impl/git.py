@@ -150,3 +150,24 @@ class GitDatastore(FileSystemDatastore):
     self.stage(key)
     if self.auto_commit:
       self.commit('delete %s' % key)
+
+
+'''
+Hello World:
+
+    >>> import datastore
+    >>> from datastore.impl.git import GitDatastore
+    >>>
+    >>> ds = GitDatastore('/tmp/.test_datastore')
+    >>>
+    >>> hello = datastore.Key('hello')
+    >>> ds.put(hello, 'world')
+    >>> ds.contains(hello)
+    True
+    >>> ds.get(hello)
+    'world'
+    >>> ds.delete(hello)
+    >>> ds.get(hello)
+    None
+
+'''
