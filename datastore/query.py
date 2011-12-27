@@ -94,10 +94,28 @@ def chain_gen(iterables):
 
 class Filter(object):
   '''Represents a Filter for a specific field and its value.
+
   Filters are used on queries to narrow down the set of matching objects.
+
+  Args:
+    field: the attribute name (string) on which to apply the filter.
+
+    op: the conditional operator to apply (one of
+        ['<', '<=', '=', '!=', '>=', '>']).
+
+    value: the attribute value to compare against.
+
+  Examples::
+
+    Filter('name', '=', 'John Cleese')
+    Filter('age', '>=', 18)
+
   '''
 
-  CONDITIONAL_OPERATORS = {
+  conditional_operators = ['<', '<=', '=', '!=', '>=', '>']
+  '''Conditional operators that Filters support.'''
+
+  _conditional_cmp = {
     "<"  : lambda a, b: a < b,
     "<=" : lambda a, b: a <= b,
     "="  : lambda a, b: a == b,
@@ -106,13 +124,14 @@ class Filter(object):
     ">"  : lambda a, b: a > b
   }
 
+
   object_getattr = staticmethod(_object_getattr)
   '''Object attribute getter. Can be overridden to match client data model.
   See :py:meth:`datastore.query._object_getattr`.
   '''
 
   def __init__(self, field, op, value):
-    if op not in self.CONDITIONAL_OPERATORS:
+    if op not in self.conditional_operators:
       raise ValueError('"%s" is not a valid filter Conditional Operator' % op)
 
     self.field = field
@@ -134,7 +153,7 @@ class Filter(object):
 
   def valuePasses(self, value):
     '''Returns whether this value passes this filter'''
-    return self.CONDITIONAL_OPERATORS[self.op](value, self.value)
+    return self._conditional_cmp[self.op](value, self.value)
 
 
   def __str__(self):
@@ -177,9 +196,23 @@ class Filter(object):
 class Order(object):
   '''Represents an Order upon a specific field, and a direction.
   Orders are used on queries to define how they operate on objects
+
+  Args:
+    order: an order in string form. This follows the format: [+-]name
+           where + is ascending, - is descending, and name is the name
+           of the field to order by.
+           Note: if no ordering operator is specified, + is default.
+
+  Examples::
+
+    Order('+name')   #  ascending order by name
+    Order('-age')    # descending order by age
+    Order('score')   #  ascending order by score
+
   '''
 
-  ORDER_OPERATORS = ['-', '+']
+  order_operators = ['-', '+']
+  '''Ordering operators: + is ascending, - is descending.'''
 
   object_getattr = staticmethod(_object_getattr)
   '''Object attribute getter. Can be overridden to match client data model.
@@ -190,7 +223,7 @@ class Order(object):
     self.op = '+'
 
     try:
-      if order[0] in self.ORDER_OPERATORS:
+      if order[0] in self.order_operators:
         self.op = order[0]
         order = order[1:]
     except IndexError:
@@ -198,7 +231,7 @@ class Order(object):
 
     self.field = order
 
-    if self.op not in self.ORDER_OPERATORS:
+    if self.op not in self.order_operators:
       raise ValueError('"%s" is not a valid Order Operator.' % op)
 
 
@@ -331,8 +364,13 @@ class Query(object):
   def order(self, order):
     '''Adds an Order to this query.
 
-    Returns self for JS-like method chaining:
-    query.order('+age').order('-home')
+    Args:
+      see :py:class:`Order <datastore.query.Order>` constructor
+
+    Returns self for JS-like method chaining::
+
+      query.order('+age').order('-home')
+
     '''
     order = order if isinstance(order, Order) else Order(order)
 
@@ -345,8 +383,13 @@ class Query(object):
   def filter(self, *args):
     '''Adds a Filter to this query.
 
-    Returns self for JS-like method chaining:
-    query.filter('age', '>', 18).filter('sex', '=', 'Female')
+    Args:
+      see :py:class:`Filter <datastore.query.Filter>` constructor
+
+    Returns self for JS-like method chaining::
+
+      query.filter('age', '>', 18).filter('sex', '=', 'Female')
+
     '''
     if len(args) == 1 and isinstance(args[0], Filter):
       filter = args[0]
