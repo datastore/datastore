@@ -220,3 +220,31 @@ man_pages = [
 
 # Example configuration for intersphinx: refer to the Python standard library.
 intersphinx_mapping = {'http://docs.python.org/': None}
+
+# -- Import Mocking for rtfd.org -----------------------------------------------
+
+# some modules have large dependencies or even c/c++ dependencies.
+# for autodoc to compile correctly in rtfd.org and other environments without
+# the presence of these dependencies, we must mock their imports.
+
+import sys
+
+class Mock(object):
+  def __init__(self, *args, **kwargs):
+    pass
+
+  def __getattr__(self, name):
+    return Mock()
+
+# name all modules to mock
+MOCK_MODULES = [
+  'bson',
+  'pymongo',
+  'pylibmc',
+  'redis',
+  'pylru',
+  'dulwich'
+]
+
+for mod_name in MOCK_MODULES:
+  sys.modules[mod_name] = Mock()
