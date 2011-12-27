@@ -9,6 +9,32 @@ def _object_getattr(obj, field):
   Order. Thus, a custom function to extract values to attributes can be
   specified, and the system can remain agnostic to the client's data model,
   without loosing query power.
+
+  For example, the default implementation works with attributes and items::
+
+    def _object_getattr(obj, field):
+      # check whether this key is an attribute
+      if hasattr(obj, field):
+        value = getattr(obj, field)
+
+      # if not, perhaps it is an item (raw dicts, etc)
+      elif field in obj:
+        value = obj[field]
+
+      # return whatever we've got.
+      return value
+
+  Or consider a more complex, application-specific structure::
+
+    def _object_getattr(version, field):
+
+      if field in ['key', 'committed', 'created', 'hash']:
+        return getattr(version, field)
+
+      else:
+        return version.attributes[field]['value']
+
+
   '''
 
   # TODO: consider changing this to raise an exception if no value is found.
@@ -80,8 +106,10 @@ class Filter(object):
     ">"  : lambda a, b: a > b
   }
 
-  '''Object attribute getter. Can be overridden to match client data model.'''
   object_getattr = staticmethod(_object_getattr)
+  '''Object attribute getter. Can be overridden to match client data model.
+  See :py:meth:`datastore.query._object_getattr`.
+  '''
 
   def __init__(self, field, op, value):
     if op not in self.CONDITIONAL_OPERATORS:
@@ -153,8 +181,10 @@ class Order(object):
 
   ORDER_OPERATORS = ['-', '+']
 
-  '''Object attribute getter. Can be overridden to match client data model.'''
   object_getattr = staticmethod(_object_getattr)
+  '''Object attribute getter. Can be overridden to match client data model.
+  See :py:meth:`datastore.query._object_getattr`.
+  '''
 
   def __init__(self, order):
     self.op = '+'
