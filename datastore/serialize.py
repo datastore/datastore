@@ -104,6 +104,17 @@ def serialized_gen(serializer, iterable):
 
 
 
+def monkey_patch_bson(bson=None):
+  '''Patch bson in pymongo to use loads and dumps interface.'''
+  if not bson:
+    import bson
+
+  if not hasattr(bson, 'loads'):
+    bson.loads = lambda document: bson.BSON.encode(document)
+
+  if not hasattr(bson, 'dumps'):
+    bson.dumps = lambda bsondoc: bson.BSON(bsondoc).decode()
+
 
 
 class SerializerShimDatastore(ShimDatastore):

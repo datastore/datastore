@@ -7,17 +7,9 @@ from datastore.serialize import *
 from test_basic import TestDatastore
 
 import pickle
-
-
-
 import bson
-def monkey_patch_bson():
-  if not hasattr(bson, 'loads'):
-    bson.loads = lambda document: bson.BSON.encode(document)
 
-  if not hasattr(bson, 'dumps'):
-    bson.dumps = lambda bsondoc: bson.BSON(bsondoc).decode()
-monkey_patch_bson()
+monkey_patch_bson(bson)
 
 
 
