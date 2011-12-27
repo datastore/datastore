@@ -24,7 +24,11 @@ throughout its lifetime. It looks like this:
 In addition, grouped datastores significantly simplify interesting data access
 patterns (such as caching and sharding).
 
-## Install
+
+
+## About
+
+### Install
 
 For now, until datastore is well-tested and added to pypi:
 
@@ -32,6 +36,28 @@ For now, until datastore is well-tested and added to pypi:
     cd datastore
     sudo python setup.py install
 
+
+### Documentation
+
+The documentation can be found at:
+http://datastore.readthedocs.org/en/latest/
+
+### License
+
+datastore is under the MIT License.
+
+### Contact
+
+datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
+was originally part of [py-dronestore](https://github.com/jbenet/py-dronestore).
+On December 2011, it was re-written as a standalone project.
+
+Project Homepage:
+[https://github.com/jbenet/datastore](https://github.com/jbenet/datastore)
+
+Feel free to contact me. But please file issues in github first. Cheers!
+
+## Examples
 
 ### Hello World
 
@@ -183,29 +209,6 @@ For now, until datastore is well-tested and added to pypi:
     >>> ds.delete(hello)
     >>> ds.get(hello)
     None
-
-
-## About
-
-### Documentation
-
-The documentation can be found at:
-http://datastore.readthedocs.org/en/latest/
-
-### License
-
-datastore is under the MIT License.
-
-### Contact
-
-datastore is written by [Juan Batiz-Benet](https://github.com/jbenet). It
-was originally part of [py-dronestore](https://github.com/jbenet/py-dronestore).
-On December 2011, it was re-written as a standalone project.
-
-Project Homepage:
-[https://github.com/jbenet/datastore](https://github.com/jbenet/datastore)
-
-Feel free to contact me. But please file issues in github first. Cheers!
 
 
 ## API
