@@ -190,7 +190,7 @@ For now, until datastore is well-tested and added to pypi:
 ### Documentation
 
 The documentation can be found at:
-http://juanbb.com/docs/datastore/
+http://datastore.readthedocs.org/en/latest/
 
 ### License
 
