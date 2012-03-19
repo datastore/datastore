@@ -68,6 +68,7 @@ class FileSystemDatastore(datastore.Datastore):
   '''
 
   object_extension = '.obj'
+  ignore_list = list()
 
   def __init__(self, root, case_sensitive=True):
     '''Initialize the datastore with given root directory `root`.
@@ -191,6 +192,7 @@ class FileSystemDatastore(datastore.Datastore):
 
     if os.path.exists(path):
       filenames = os.listdir(path)
+      filenames = list(set(filenames) - set(self.ignore_list))
       filenames = map(lambda f: os.path.join(path, f), filenames)
       iterable = self._read_object_gen(filenames)
     else:
