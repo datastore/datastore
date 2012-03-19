@@ -109,6 +109,7 @@ class GitDatastore(FileSystemDatastore):
   '''git version controlled datastore, on top of FileSystemDatastore.'''
 
   git_interface = git_dulwich_interface if dulwich else git_cli_interface
+  ignore_list = ['.git']
 
   def __init__(self, root, auto_commit=True, **kwargs):
     '''Initialize the datastore with given root directory `root`.
