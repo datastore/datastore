@@ -88,7 +88,8 @@ class git_dulwich_interface(git_interface):
 
   def init(self):
     '''Create an empty git repository or reinitialize an existing one'''
-    if os.path.isdir(self.path):
+    gitdir = os.path.join(self.path, '.git')
+    if os.path.isdir(gitdir):
       self.repo = dulwich.repo.Repo(self.path)
     else:
       self.repo = dulwich.repo.Repo.init(self.path)
