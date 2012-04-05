@@ -18,5 +18,8 @@ setup(
   packages=packages,
   install_requires=["smhasher"],
   extras_requires=["bson", "nanotime"],
-  license="MIT License"
+  license="MIT License",
+  classifiers=[
+    "Topic :: Database :: Front-Ends"
+  ]
 )
