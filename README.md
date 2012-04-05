@@ -30,7 +30,15 @@ patterns (such as caching and sharding).
 
 ### Install
 
-For now, until datastore is well-tested and added to pypi:
+From pypi (using pip):
+
+    sudo pip install datastore
+
+From pypi (using setuptools):
+
+    sudo easy_install datastore
+
+From source:
 
     git clone https://github.com/jbenet/datastore/
     cd datastore

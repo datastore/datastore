@@ -44,7 +44,16 @@ implementations included with this datastore.
 Install
 =======
 
-Until datastore is well-tested and in pypi, install from the git repository::
+From pypi (using pip)::
+
+    sudo pip install datastore
+
+From pypi (using setuptools)::
+
+    sudo easy_install datastore
+
+From source::
+
 
     git clone https://github.com/jbenet/datastore/
     cd datastore
