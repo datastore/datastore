@@ -118,6 +118,18 @@ class TestDictionaryDatastore(TestDatastore):
     self.subtest_simple(stores)
 
 
+class TestLowercaseKeyDatastore(TestDatastore):
+
+  def test_dictionary(self):
+
+    s1 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
+    s2 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
+    s3 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
+    stores = [s1, s2, s3]
+
+    self.subtest_simple(stores)
+
+
 
 class TestDatastoreCollection(TestDatastore):
 

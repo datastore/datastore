@@ -335,6 +335,39 @@ class ShimDatastore(Datastore):
     return self.child_datastore.query(query)
 
 
+
+class LowercaseKeyDatastore(ShimDatastore):
+  '''Represents a simple ShimDatastore that lowercases all keys.'''
+
+  def get(self, key):
+    '''Return the object named by key.lower().'''
+    return self.child_datastore.get(self.lowercaseKey(key))
+
+  def put(self, key, value):
+    '''Stores the object names by key.lower().'''
+    return self.child_datastore.put(self.lowercaseKey(key), value)
+
+  def delete(self, key):
+    '''Removes the object named by key.lower().'''
+    return self.child_datastore.delete(self.lowercaseKey(key))
+
+  def contains(self, key):
+    '''Returns whether the object named by key.lower() is in this datastore.'''
+    return self.child_datastore.contains(self.lowercaseKey(key))
+
+  def query(self, query):
+    '''Returns a sequence of objects matching criteria expressed in `query`'''
+    query = query.copy()
+    query.key = self.lowercaseKey(query.key)
+    return self.child_datastore.query(query)
+
+  @classmethod
+  def lowercaseKey(cls, key):
+    '''Returns a lowercased `key`.'''
+    return key.__class__(str(key).lower())
+
+
+
 class DatastoreCollection(ShimDatastore):
   '''Represents a collection of datastores.'''
 

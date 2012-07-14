@@ -30,6 +30,25 @@ ShimDatastore
 To implement a shim datastore, derive from :py:class:`datastore.ShimDatastore`
 and override any of the operations.
 
-
 .. autoclass:: datastore.ShimDatastore
+   :members:
+
+
+LowercaseKeyDatastore
+---------------------
+
+Represents a simple ShimDatastore that lowercases all keys.
+
+    >>> import datastore
+    >>> ds = datastore.DictDatastore()
+    >>> ds.put(datastore.Key('hello'), 'world')
+    >>> ds.get(datastore.Key('HeLlO'))
+    None
+    >>> lds = datastore.LowercaseKeyDatastore(ds)
+    >>> lds.put(datastore.Key('hello'), 'world')
+    >>> lds.get(datastore.Key('HeLlO'))
+    'world'
+
+
+.. autoclass:: datastore.LowercaseKeyDatastore
    :members:
