@@ -1,6 +1,6 @@
 
 __version__ = '1.1'
-__author__ = 'Juan Batiz-Benet <jbenet@cs.stanford.edu>'
+__author__ = 'Juan Batiz-Benet <juan@benet.ai>'
 __doc__ = '''
 filesystem datastore implementation.
 

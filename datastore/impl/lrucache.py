@@ -3,7 +3,7 @@ import pylru
 import datastore
 
 __version__ = '1.0'
-__author__ = 'Juan Batiz-Benet <jbenet@cs.stanford.edu>'
+__author__ = 'Juan Batiz-Benet <juan@benet.ai>'
 
 
 class LRUCache(datastore.Datastore):

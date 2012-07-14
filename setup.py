@@ -12,7 +12,7 @@ setup(
   version=__version__,
   description="simple, unified API for multiple data stores",
   author="Juan Batiz-Benet",
-  author_email="jbenet@cs.stanford.com",
+  author_email="juan@benet.ai",
   url="http://github.com/jbenet/datastore",
   keywords=["datastore", "unified api", "memcached", "redis", "git", "mongo"],
   packages=packages,
