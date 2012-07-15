@@ -53,10 +53,21 @@ class TestDatastore(unittest.TestCase):
 
     checkLength(numelems)
 
-    def test_query(query, expected):
+    k = pkey
+    n = int(numelems)
+    allitems = list(range(0, n))
+
+    def test_query(query, slice):
       for sn in stores:
         try:
+          contents = list(sn.query(Query(pkey)))
+          expected = contents[slice]
           result = list(sn.query(query))
+
+          # make sure everything is there.
+          self.assertTrue(len(contents) == len(allitems))
+          self.assertTrue(all([val in contents for val in allitems]))
+
           self.assertTrue(len(result) == len(expected))
           self.assertTrue(all([val in result for val in expected]))
           #TODO: should order be preserved?
@@ -65,21 +76,11 @@ class TestDatastore(unittest.TestCase):
         except NotImplementedError:
           print 'WARNING: %s does not implement query.' % sn
 
-    for sn in stores:
-      try:
-        dsresults = list(stores[0].query(Query(pkey)))
-      except NotImplementedError:
-        dsresults = []
-
-
-    k = pkey
-    n = int(numelems)
-    test_query(Query(k), list(range(0, n))) # make sure everything is there.
-    test_query(Query(k), dsresults[:n])
-    test_query(Query(k, limit=n), dsresults[:n])
-    test_query(Query(k, limit=n/2), dsresults[:n/2])
-    test_query(Query(k, offset=n/2), dsresults[n/2:])
-    test_query(Query(k, offset=n/3, limit=n/3), dsresults[n/3: 2*(n/3)])
+    test_query(Query(k), slice(0, n))
+    test_query(Query(k, limit=n), slice(0, n))
+    test_query(Query(k, limit=n/2), slice(0, n/2))
+    test_query(Query(k, offset=n/2), slice(n/2, n))
+    test_query(Query(k, offset=n/3, limit=n/3), slice(n/3, 2*(n/3)))
     del k
     del n
 
