@@ -1,4 +1,5 @@
 
+from key import Key
 from query import Cursor
 
 class Datastore(object):
@@ -424,7 +425,43 @@ class LowercaseKeyDatastore(KeyTransformDatastore):
   @classmethod
   def lowercaseKey(cls, key):
     '''Returns a lowercased `key`.'''
-    return key.__class__(str(key).lower())
+    return Key(str(key).lower())
+
+
+
+class NamespaceDatastore(KeyTransformDatastore):
+  '''Represents a simple ShimDatastore that namespaces all incoming keys.
+     For example:
+
+      >>> import datastore
+      >>>
+      >>> ds = datastore.DictDatastore()
+      >>> ds.put(datastore.Key('/a/b'), 'ab')
+      >>> ds.put(datastore.Key('/c/d'), 'cd')
+      >>> ds.put(datastore.Key('/a/b/c/d'), 'abcd')
+      >>>
+      >>> nd = datastore.NamespaceDatastore('/a/b', ds)
+      >>> nd.get(datastore.Key('/a/b'))
+      None
+      >>> nd.get(datastore.Key('/c/d'))
+      'abcd'
+      >>> nd.get(datastore.Key('/a/b/c/d'))
+      None
+      >>> nd.put(datastore.Key('/c/d'), 'cd')
+      >>> ds.get(datastore.Key('/a/b/c/d'))
+      'cd'
+
+  '''
+
+  def __init__(self, namespace, *args, **kwargs):
+    '''Initializes NamespaceDatastore with `key` namespace.'''
+    super(NamespaceDatastore, self).__init__(*args, **kwargs)
+    self.keytransform = self.namespaceKey
+    self.namespace = Key(namespace)
+
+  def namespaceKey(self, key):
+    '''Returns a namespaced `key`: namespace.child(key).'''
+    return self.namespace.child(key)
 
 
 

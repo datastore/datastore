@@ -45,3 +45,9 @@ LowercaseKeyDatastore
 
 .. autoclass:: datastore.LowercaseKeyDatastore
    :members:
+
+NamespaceDatastore
+---------------------
+
+.. autoclass:: datastore.NamespaceDatastore
+   :members:

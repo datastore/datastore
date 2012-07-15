@@ -17,11 +17,13 @@ from key import Namespace
 
 import basic
 from basic import Datastore
-from basic import ShimDatastore
 from basic import DictDatastore
 from basic import InterfaceMappingDatastore
+
+from basic import ShimDatastore
 from basic import KeyTransformDatastore
 from basic import LowercaseKeyDatastore
+from basic import NamespaceDatastore
 
 from basic import DatastoreCollection
 from basic import ShardedDatastore

@@ -247,6 +247,49 @@ class TestLowercaseKeyDatastore(TestDatastore):
     test(k3, 'c')
 
 
+class TestNamespaceDatastore(TestDatastore):
+
+  def test_simple(self):
+
+    s1 = datastore.NamespaceDatastore(Key('a'), datastore.DictDatastore())
+    s2 = datastore.NamespaceDatastore(Key('b'), datastore.DictDatastore())
+    s3 = datastore.NamespaceDatastore(Key('c'), datastore.DictDatastore())
+    stores = [s1, s2, s3]
+
+    self.subtest_simple(stores)
+
+
+  def test_namespace(self):
+
+    k1 = Key('/c/d')
+    k2 = Key('/a/b')
+    k3 = Key('/a/b/c/d')
+
+    ds = datastore.DictDatastore()
+    nd = datastore.NamespaceDatastore(k2, ds)
+
+    ds.put(k1, 'cd')
+    ds.put(k3, 'abcd')
+
+    self.assertEqual(ds.get(k1), 'cd')
+    self.assertFalse(ds.contains(k2))
+    self.assertEqual(ds.get(k3), 'abcd')
+
+    self.assertEqual(nd.get(k1), 'abcd')
+    self.assertFalse(nd.contains(k2))
+    self.assertFalse(nd.contains(k3))
+
+    def test(key, val):
+      nd.put(key, val)
+      self.assertEqual(nd.get(key), val)
+      self.assertFalse(ds.contains(key))
+      self.assertFalse(nd.contains(k2.child(key)))
+      self.assertEqual(ds.get(k2.child(key)), val)
+
+    for i in range(0, 10):
+      test(Key(str(i)), 'val%d' % i)
+
+
 class TestDatastoreCollection(TestDatastore):
 
   def test_tiered(self):
