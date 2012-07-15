@@ -9,6 +9,14 @@ impl Package
     :undoc-members:
     :show-inheritance:
 
+:mod:`aws` Module
+-----------------
+
+.. automodule:: datastore.impl.aws
+    :members:
+    :undoc-members:
+    :show-inheritance:
+
 :mod:`filesystem` Module
 ------------------------
 
@@ -56,4 +64,3 @@ impl Package
     :members:
     :undoc-members:
     :show-inheritance:
-
