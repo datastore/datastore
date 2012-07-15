@@ -20,6 +20,7 @@ from basic import Datastore
 from basic import ShimDatastore
 from basic import DictDatastore
 from basic import InterfaceMappingDatastore
+from basic import KeyTransformDatastore
 from basic import LowercaseKeyDatastore
 
 from basic import DatastoreCollection

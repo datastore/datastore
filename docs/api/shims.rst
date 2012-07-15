@@ -34,29 +34,14 @@ and override any of the operations.
    :members:
 
 
-LowercaseKeyDatastore
+KeyTransformDatastore
 ---------------------
 
-Represents a simple ShimDatastore that lowercases all keys.
+.. autoclass:: datastore.KeyTransformDatastore
+   :members:
 
-    >>> import datastore
-    >>> ds = datastore.DictDatastore()
-    >>> ds.put(datastore.Key('hello'), 'world')
-    >>> ds.put(datastore.Key('HELLO'), 'WORLD')
-    >>> ds.get(datastore.Key('hello'))
-    'world'
-    >>> ds.get(datastore.Key('HELLO'))
-    'WORLD'
-    >>> ds.get(datastore.Key('HeLlO'))
-    None
-    >>> lds = datastore.LowercaseKeyDatastore(ds)
-    >>> lds.get(datastore.Key('HeLlO'))
-    'world'
-    >>> lds.get(datastore.Key('HeLlO'))
-    'world'
-    >>> lds.get(datastore.Key('HeLlO'))
-    'world'
-
+LowercaseKeyDatastore
+---------------------
 
 .. autoclass:: datastore.LowercaseKeyDatastore
    :members:

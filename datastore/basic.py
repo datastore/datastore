@@ -336,35 +336,97 @@ class ShimDatastore(Datastore):
 
 
 
-class LowercaseKeyDatastore(ShimDatastore):
-  '''Represents a simple ShimDatastore that lowercases all keys.'''
+class KeyTransformDatastore(ShimDatastore):
+  '''Represents a simple ShimDatastore that applies a transform on all incoming
+     keys. For example:
+
+       >>> import datastore
+       >>> def transform(key):
+       ...   return key.reverse
+       ...
+       >>> ds = datastore.DictDatastore()
+       >>> kt = datastore.KeyTransformDatastore(ds, keytransform=transform)
+       None
+       >>> ds.put(datastore.Key('/a/b/c'), 'abc')
+       >>> ds.get(datastore.Key('/a/b/c'))
+       'abc'
+       >>> kt.get(datastore.Key('/a/b/c'))
+       None
+       >>> kt.get(datastore.Key('/c/b/a'))
+       'abc'
+       >>> ds.get(datastore.Key('/c/b/a'))
+       None
+
+  '''
+
+  def __init__(self, *args, **kwargs):
+    '''Initializes KeyTransformDatastore with `keytransform` function.'''
+    self.keytransform = kwargs.pop('keytransform', None)
+    super(KeyTransformDatastore, self).__init__(*args, **kwargs)
 
   def get(self, key):
-    '''Return the object named by key.lower().'''
-    return self.child_datastore.get(self.lowercaseKey(key))
+    '''Return the object named by keytransform(key).'''
+    return self.child_datastore.get(self._transform(key))
 
   def put(self, key, value):
-    '''Stores the object names by key.lower().'''
-    return self.child_datastore.put(self.lowercaseKey(key), value)
+    '''Stores the object names by keytransform(key).'''
+    return self.child_datastore.put(self._transform(key), value)
 
   def delete(self, key):
-    '''Removes the object named by key.lower().'''
-    return self.child_datastore.delete(self.lowercaseKey(key))
+    '''Removes the object named by keytransform(key).'''
+    return self.child_datastore.delete(self._transform(key))
 
   def contains(self, key):
-    '''Returns whether the object named by key.lower() is in this datastore.'''
-    return self.child_datastore.contains(self.lowercaseKey(key))
+    '''Returns whether the object named by key is in this datastore.'''
+    return self.child_datastore.contains(self._transform(key))
 
   def query(self, query):
     '''Returns a sequence of objects matching criteria expressed in `query`'''
     query = query.copy()
-    query.key = self.lowercaseKey(query.key)
+    query.key = self._transform(query.key)
     return self.child_datastore.query(query)
+
+  def _transform(self, key):
+    '''Returns a `key` transformed by `self.keytransform`.'''
+    return self.keytransform(key) if self.keytransform else key
+
+
+
+class LowercaseKeyDatastore(KeyTransformDatastore):
+  '''Represents a simple ShimDatastore that lowercases all incoming keys.
+     For example:
+
+      >>> import datastore
+      >>> ds = datastore.DictDatastore()
+      >>> ds.put(datastore.Key('hello'), 'world')
+      >>> ds.put(datastore.Key('HELLO'), 'WORLD')
+      >>> ds.get(datastore.Key('hello'))
+      'world'
+      >>> ds.get(datastore.Key('HELLO'))
+      'WORLD'
+      >>> ds.get(datastore.Key('HeLlO'))
+      None
+      >>> lds = datastore.LowercaseKeyDatastore(ds)
+      >>> lds.get(datastore.Key('HeLlO'))
+      'world'
+      >>> lds.get(datastore.Key('HeLlO'))
+      'world'
+      >>> lds.get(datastore.Key('HeLlO'))
+      'world'
+
+  '''
+
+  def __init__(self, *args, **kwargs):
+    '''Initializes KeyTransformDatastore with keytransform function.'''
+    super(LowercaseKeyDatastore, self).__init__(*args, **kwargs)
+    self.keytransform = self.lowercaseKey
 
   @classmethod
   def lowercaseKey(cls, key):
     '''Returns a lowercased `key`.'''
     return key.__class__(str(key).lower())
+
+
 
 
 

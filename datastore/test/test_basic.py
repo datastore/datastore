@@ -118,6 +118,91 @@ class TestDictionaryDatastore(TestDatastore):
     self.subtest_simple(stores)
 
 
+class TestKeyTransformDatastore(TestDatastore):
+
+  def test_simple(self):
+
+    s1 = datastore.KeyTransformDatastore(datastore.DictDatastore())
+    s2 = datastore.KeyTransformDatastore(datastore.DictDatastore())
+    s3 = datastore.KeyTransformDatastore(datastore.DictDatastore())
+    stores = [s1, s2, s3]
+
+    self.subtest_simple(stores)
+
+  def test_reverse_transform(self):
+
+    def transform(key):
+      return key.reverse
+
+    ds = datastore.DictDatastore()
+    kt = datastore.KeyTransformDatastore(ds, keytransform=transform)
+
+    k1 = Key('/a/b/c')
+    k2 = Key('/c/b/a')
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertFalse(kt.contains(k1))
+    self.assertFalse(kt.contains(k2))
+
+    ds.put(k1, 'abc')
+    self.assertEqual(ds.get(k1), 'abc')
+    self.assertFalse(ds.contains(k2))
+    self.assertFalse(kt.contains(k1))
+    self.assertEqual(kt.get(k2), 'abc')
+
+    kt.put(k1, 'abc')
+    self.assertEqual(ds.get(k1), 'abc')
+    self.assertEqual(ds.get(k2), 'abc')
+    self.assertEqual(kt.get(k1), 'abc')
+    self.assertEqual(kt.get(k2), 'abc')
+
+    ds.delete(k1)
+    self.assertFalse(ds.contains(k1))
+    self.assertEqual(ds.get(k2), 'abc')
+    self.assertEqual(kt.get(k1), 'abc')
+    self.assertFalse(kt.contains(k2))
+
+    kt.delete(k1)
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertFalse(kt.contains(k1))
+    self.assertFalse(kt.contains(k2))
+
+  def test_lowercase_transform(self):
+
+    def transform(key):
+      return Key(str(key).lower())
+
+    ds = datastore.DictDatastore()
+    lds = datastore.KeyTransformDatastore(ds, keytransform=transform)
+
+    k1 = Key('hello')
+    k2 = Key('HELLO')
+    k3 = Key('HeLlo')
+
+    ds.put(k1, 'world')
+    ds.put(k2, 'WORLD')
+
+    self.assertEqual(ds.get(k1), 'world')
+    self.assertEqual(ds.get(k2), 'WORLD')
+    self.assertFalse(ds.contains(k3))
+
+    self.assertEqual(lds.get(k1), 'world')
+    self.assertEqual(lds.get(k2), 'world')
+    self.assertEqual(lds.get(k3), 'world')
+
+    def test(key, val):
+      lds.put(key, val)
+      self.assertEqual(lds.get(k1), val)
+      self.assertEqual(lds.get(k2), val)
+      self.assertEqual(lds.get(k3), val)
+
+    test(k1, 'a')
+    test(k2, 'b')
+    test(k3, 'c')
+
+
+
 class TestLowercaseKeyDatastore(TestDatastore):
 
   def test_simple(self):
@@ -144,7 +229,7 @@ class TestLowercaseKeyDatastore(TestDatastore):
 
     self.assertEqual(ds.get(k1), 'world')
     self.assertEqual(ds.get(k2), 'WORLD')
-    self.assertFalse(ds.contains(k3), 'WORLD')
+    self.assertFalse(ds.contains(k3))
 
     self.assertEqual(lds.get(k1), 'world')
     self.assertEqual(lds.get(k2), 'world')
