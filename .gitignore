@@ -3,3 +3,4 @@ build/
 datastore.egg-info
 dist
 .tm_properties
+pypi/
