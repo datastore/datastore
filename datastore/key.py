@@ -119,6 +119,16 @@ class Key(object):
       return Key(self.list[:-1])
     raise ValueError('%s is base key (it has no parent)' % repr(self))
 
+  @property
+  def reverse(self):
+    '''Returns the reverse of this Key.
+
+        >>> Key('/Comedy/MontyPython/Actor:JohnCleese').reverse
+        Key('/Actor:JohnCleese/MontyPython/Comedy')
+
+    '''
+    return Key(self.list[::-1])
+
   def child(self, other):
     '''Returns the child Key by appending namespace `other`.
 
