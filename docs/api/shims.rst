@@ -42,10 +42,18 @@ Represents a simple ShimDatastore that lowercases all keys.
     >>> import datastore
     >>> ds = datastore.DictDatastore()
     >>> ds.put(datastore.Key('hello'), 'world')
+    >>> ds.put(datastore.Key('HELLO'), 'WORLD')
+    >>> ds.get(datastore.Key('hello'))
+    'world'
+    >>> ds.get(datastore.Key('HELLO'))
+    'WORLD'
     >>> ds.get(datastore.Key('HeLlO'))
     None
     >>> lds = datastore.LowercaseKeyDatastore(ds)
-    >>> lds.put(datastore.Key('hello'), 'world')
+    >>> lds.get(datastore.Key('HeLlO'))
+    'world'
+    >>> lds.get(datastore.Key('HeLlO'))
+    'world'
     >>> lds.get(datastore.Key('HeLlO'))
     'world'
 

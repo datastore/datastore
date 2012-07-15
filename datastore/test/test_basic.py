@@ -120,7 +120,7 @@ class TestDictionaryDatastore(TestDatastore):
 
 class TestLowercaseKeyDatastore(TestDatastore):
 
-  def test_dictionary(self):
+  def test_simple(self):
 
     s1 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
     s2 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
@@ -129,6 +129,36 @@ class TestLowercaseKeyDatastore(TestDatastore):
 
     self.subtest_simple(stores)
 
+
+  def test_lowercase(self):
+
+    ds = datastore.DictDatastore()
+    lds = datastore.LowercaseKeyDatastore(ds)
+
+    k1 = Key('hello')
+    k2 = Key('HELLO')
+    k3 = Key('HeLlo')
+
+    ds.put(k1, 'world')
+    ds.put(k2, 'WORLD')
+
+    self.assertEqual(ds.get(k1), 'world')
+    self.assertEqual(ds.get(k2), 'WORLD')
+    self.assertFalse(ds.contains(k3), 'WORLD')
+
+    self.assertEqual(lds.get(k1), 'world')
+    self.assertEqual(lds.get(k2), 'world')
+    self.assertEqual(lds.get(k3), 'world')
+
+    def test(key, val):
+      lds.put(key, val)
+      self.assertEqual(lds.get(k1), val)
+      self.assertEqual(lds.get(k2), val)
+      self.assertEqual(lds.get(k3), val)
+
+    test(k1, 'a')
+    test(k2, 'b')
+    test(k3, 'c')
 
 
 class TestDatastoreCollection(TestDatastore):
