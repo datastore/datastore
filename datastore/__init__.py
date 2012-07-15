@@ -1,5 +1,5 @@
 
-__version__ = '0.2.3'
+__version__ = '0.2.4'
 __author__ = 'Juan Batiz-Benet <juan@benet.ai>'
 
 __doc__ = '''
