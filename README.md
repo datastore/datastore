@@ -65,6 +65,34 @@ Project Homepage:
 
 Feel free to contact me. But please file issues in github first. Cheers!
 
+## Contributing
+
+### Implementations
+
+Please write and contribute implementations for other data stores. This project
+can only be complete with lots of help.
+
+### Style
+
+Please follow proper pythonic style in your code.
+
+See [PEP 8](http://www.python.org/dev/peps/pep-0008/) and the [Google Python
+Style Guide](http://google-styleguide.googlecode.com/svn/trunk/pyguide.html).
+
+### Docs
+
+Please document all code. ``datastore`` uses ``sphinx`` for documentation. Take
+a look at the ``docs/`` directory.
+
+To make sure the documentation compiles, run:
+
+  cd docs
+  make html
+  open .build/html/index.html
+
+Which should -- if all goes well -- open your favorite browser on the
+newly-built docs.
+
 ## Examples
 
 ### Hello World
