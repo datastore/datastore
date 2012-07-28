@@ -467,6 +467,88 @@ class NamespaceDatastore(KeyTransformDatastore):
 
 
 
+class NestedPathDatastore(KeyTransformDatastore):
+  '''Represents a simple ShimDatastore that shards/namespaces incoming keys.
+
+    Incoming keys are sharded into nested namespaces. The idea is to use the key
+    name to separate into nested namespaces. This is akin to the directory
+    structure that ``git`` uses for objects. For example:
+
+    >>> import datastore
+    >>>
+    >>> ds = datastore.DictDatastore()
+    >>> np = datastore.NestedPathDatastore(ds, depth=3, length=2)
+    >>>
+    >>> np.put(datastore.Key('/abcdefghijk'), 1)
+    >>> np.get(datastore.Key('/abcdefghijk'))
+    1
+    >>> ds.get(datastore.Key('/abcdefghijk'))
+    None
+    >>> ds.get(datastore.Key('/ab/cd/ef/abcdefghijk'))
+    1
+    >>> np.put(datastore.Key('abc'), 2)
+    >>> np.get(datastore.Key('abc'))
+    2
+    >>> ds.get(datastore.Key('/ab/ca/bc/abc'))
+    2
+
+  '''
+  _default_depth = 3
+  _default_length = 2
+
+  def __init__(self, *args, **kwargs):
+    '''Initializes KeyTransformDatastore with keytransform function.
+
+    kwargs:
+      depth: the nesting level depth (e.g. 3 => /1/2/3/123) default: 3
+      length: the nesting level length (e.g. 2 => /12/123456) default: 2
+    '''
+
+    # assign the nesting variables
+    self.nest_depth = kwargs.pop('depth', self._default_depth)
+    self.nest_length = kwargs.pop('length', self._default_length)
+
+    super(NestedPathDatastore, self).__init__(*args, **kwargs)
+    self.keytransform = self.nestKey
+
+  def query(self, query):
+    # Requires supporting * operator on queries.
+    raise NotImplementedError
+
+  def nestKey(self, key):
+    '''Returns a nested `key`.'''
+
+    # if depth * length > len(key.name), we need to pad.
+    mult = 1 + int(self.nest_depth * self.nest_length / len(key.name))
+
+    path = key.name * mult
+    pref = Key(self.nestedPath(path, self.nest_depth, self.nest_length))
+    return pref.child(key)
+
+  @staticmethod
+  def nestedPath(path, depth, length):
+    '''returns a nested version of `basename`, using the starting characters.
+      For example:
+
+        >>> NestedPathDatastore.nested_path('abcdefghijk', 3, 2)
+        'ab/cd/ef'
+        >>> NestedPathDatastore.nested_path('abcdefghijk', 4, 2)
+        'ab/cd/ef/gh'
+        >>> NestedPathDatastore.nested_path('abcdefghijk', 3, 4)
+        'abcd/efgh/ijk'
+        >>> NestedPathDatastore.nested_path('abcdefghijk', 1, 4)
+        'abcd'
+        >>> NestedPathDatastore.nested_path('abcdefghijk', 3, 10)
+        'abcdefghij/k'
+    '''
+    components = [path[n:n+length] for n in xrange(0, len(path), length)]
+    components = components[:depth]
+    return '/'.join(components)
+
+
+
+
+
 class DatastoreCollection(ShimDatastore):
   '''Represents a collection of datastores.'''
 

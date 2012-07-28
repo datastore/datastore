@@ -293,6 +293,119 @@ class TestNamespaceDatastore(TestDatastore):
       test(Key(str(i)), 'val%d' % i)
 
 
+
+class TestNestedPathDatastore(TestDatastore):
+
+  def test_simple(self):
+
+    s1 = datastore.NestedPathDatastore(DictDatastore())
+    s2 = datastore.NestedPathDatastore(DictDatastore(), depth=2)
+    s3 = datastore.NestedPathDatastore(DictDatastore(), length=2)
+    s4 = datastore.NestedPathDatastore(DictDatastore(), length=1, depth=2)
+    stores = [s1, s2, s3, s4]
+
+    self.subtest_simple(stores)
+
+
+  def test_nested_path(self):
+
+    nested_path = datastore.NestedPathDatastore.nestedPath
+
+    def test(depth, length, expected):
+      nested = nested_path('abcdefghijk', depth, length)
+      self.assertEqual(nested, expected)
+
+    test(3, 2, 'ab/cd/ef')
+    test(4, 2, 'ab/cd/ef/gh')
+    test(3, 4, 'abcd/efgh/ijk')
+    test(1, 4, 'abcd')
+    test(3, 10, 'abcdefghij/k')
+
+  def test_nested_path_ds(self):
+
+    k1 = Key('/abcdefghijk')
+    k2 = Key('/abcdefghijki')
+    k3 = Key('/ab/cd/ef/abcdefghijk')
+    k4 = Key('/ab/cd/ef/abcdefghijki')
+
+    ds = DictDatastore()
+    np = datastore.NestedPathDatastore(ds, depth=3, length=2)
+
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertFalse(ds.contains(k3))
+    self.assertFalse(ds.contains(k4))
+
+    self.assertFalse(np.contains(k1))
+    self.assertFalse(np.contains(k2))
+    self.assertFalse(np.contains(k3))
+    self.assertFalse(np.contains(k4))
+
+    np.put(k1, k1)
+    np.put(k2, k2)
+
+    print ds._items
+
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertTrue(ds.contains(k3))
+    self.assertTrue(ds.contains(k4))
+
+    self.assertTrue(np.contains(k1))
+    self.assertTrue(np.contains(k2))
+    self.assertFalse(np.contains(k3))
+    self.assertFalse(np.contains(k4))
+
+    self.assertEqual(np.get(k1), k1)
+    self.assertEqual(np.get(k2), k2)
+    self.assertEqual(ds.get(k3), k1)
+    self.assertEqual(ds.get(k4), k2)
+
+    np.delete(k1)
+    np.delete(k2)
+
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertFalse(ds.contains(k3))
+    self.assertFalse(ds.contains(k4))
+
+    self.assertFalse(np.contains(k1))
+    self.assertFalse(np.contains(k2))
+    self.assertFalse(np.contains(k3))
+    self.assertFalse(np.contains(k4))
+
+    ds.put(k3, k1)
+    ds.put(k4, k2)
+
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertTrue(ds.contains(k3))
+    self.assertTrue(ds.contains(k4))
+
+    self.assertTrue(np.contains(k1))
+    self.assertTrue(np.contains(k2))
+    self.assertFalse(np.contains(k3))
+    self.assertFalse(np.contains(k4))
+
+    self.assertEqual(np.get(k1), k1)
+    self.assertEqual(np.get(k2), k2)
+    self.assertEqual(ds.get(k3), k1)
+    self.assertEqual(ds.get(k4), k2)
+
+    ds.delete(k3)
+    ds.delete(k4)
+
+    self.assertFalse(ds.contains(k1))
+    self.assertFalse(ds.contains(k2))
+    self.assertFalse(ds.contains(k3))
+    self.assertFalse(ds.contains(k4))
+
+    self.assertFalse(np.contains(k1))
+    self.assertFalse(np.contains(k2))
+    self.assertFalse(np.contains(k3))
+    self.assertFalse(np.contains(k4))
+
+
 class TestDatastoreCollection(TestDatastore):
 
   def test_tiered(self):

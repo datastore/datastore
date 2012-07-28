@@ -51,3 +51,9 @@ NamespaceDatastore
 
 .. autoclass:: datastore.NamespaceDatastore
    :members:
+
+NestedPathDatastore
+---------------------
+
+.. autoclass:: datastore.NestedPathDatastore
+   :members:
