@@ -11,8 +11,13 @@ class TestRedisDatastore(TestDatastore):
   redis_args = {'host': 'localhost', 'port' : 6379}
 
   def setUp(self):
-    self.client = redis.Redis(**self.redis_args)
-    self.client.flushall()
+    try:
+      self.client = redis.Redis(**self.redis_args)
+      self.client.flushall()
+    except redis.ConnectionError:
+      err = 'Error connecting to redis. '\
+            'Check this server is running: %(host)s:%(port)d'
+      raise Exception(err % self.redis_args)
 
   def tearDown(self):
     self.client.flushall()

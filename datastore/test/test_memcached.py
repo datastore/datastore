@@ -14,7 +14,12 @@ class TestMemcachedDatastore(TestDatastore):
   def setUp(self):
     c = pylibmc.Client(self.servers, binary=True, behaviors=self.behaviors)
     self.client = c
-    self.client.flush_all()
+
+    try:
+      self.client.flush_all()
+    except pylibmc.WriteError:
+      err = 'Error writing to memcached. Check these servers are running: %s'
+      raise Exception(err % self.servers)
 
   def tearDown(self):
     self.client.flush_all()

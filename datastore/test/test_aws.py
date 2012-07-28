@@ -22,6 +22,11 @@ class TestS3BucketDatastore(TestDatastore):
   def setUp(self):
     logging.getLogger('boto').setLevel(logging.CRITICAL)
 
+    err = 'Use a real S3 %s. Edit datastore/test/test_aws.py.'
+    assert self.s3bucketname != '<aws bucket name>', err % 'bucket'
+    assert self.s3connargs[0] != '<aws access key>', err % 'access key.'
+    assert self.s3connargs[1] != '<aws secret key>', err % 'secret key.'
+
     self.s3conn = S3Connection(*self.s3connargs)
     self.s3bucket = self.s3conn.get_bucket(self.s3bucketname)
     self._deletekeys() # make sure we're clean :)
