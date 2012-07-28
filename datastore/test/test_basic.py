@@ -66,10 +66,12 @@ class TestDatastore(unittest.TestCase):
           result = list(sn.query(query))
 
           # make sure everything is there.
-          self.assertTrue(len(contents) == len(allitems))
+          self.assertTrue(len(contents) == len(allitems),\
+            '%s == %s' %  (str(contents), str(allitems)))
           self.assertTrue(all([val in contents for val in allitems]))
 
-          self.assertTrue(len(result) == len(expected))
+          self.assertTrue(len(result) == len(expected),\
+            '%s == %s' %  (str(result), str(expected)))
           self.assertTrue(all([val in result for val in expected]))
           #TODO: should order be preserved?
           # self.assertEqual(result, expected)
