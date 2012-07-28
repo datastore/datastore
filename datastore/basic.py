@@ -493,8 +493,11 @@ class NestedPathDatastore(KeyTransformDatastore):
     2
 
   '''
+
   _default_depth = 3
   _default_length = 2
+  _default_keyfn = lambda key: key.name
+  _default_keyfn = staticmethod(_default_keyfn)
 
   def __init__(self, *args, **kwargs):
     '''Initializes KeyTransformDatastore with keytransform function.
@@ -507,6 +510,7 @@ class NestedPathDatastore(KeyTransformDatastore):
     # assign the nesting variables
     self.nest_depth = kwargs.pop('depth', self._default_depth)
     self.nest_length = kwargs.pop('length', self._default_length)
+    self.nest_keyfn = kwargs.pop('keyfn', self._default_keyfn)
 
     super(NestedPathDatastore, self).__init__(*args, **kwargs)
     self.keytransform = self.nestKey
@@ -518,11 +522,13 @@ class NestedPathDatastore(KeyTransformDatastore):
   def nestKey(self, key):
     '''Returns a nested `key`.'''
 
-    # if depth * length > len(key.name), we need to pad.
-    mult = 1 + int(self.nest_depth * self.nest_length / len(key.name))
+    nest = self.nest_keyfn(key)
 
-    path = key.name * mult
-    pref = Key(self.nestedPath(path, self.nest_depth, self.nest_length))
+    # if depth * length > len(key.name), we need to pad.
+    mult = 1 + int(self.nest_depth * self.nest_length / len(nest))
+    nest = nest * mult
+
+    pref = Key(self.nestedPath(nest, self.nest_depth, self.nest_length))
     return pref.child(key)
 
   @staticmethod

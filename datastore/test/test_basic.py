@@ -321,15 +321,15 @@ class TestNestedPathDatastore(TestDatastore):
     test(1, 4, 'abcd')
     test(3, 10, 'abcdefghij/k')
 
-  def test_nested_path_ds(self):
+  def subtest_nested_path_ds(self, **kwargs):
 
-    k1 = Key('/abcdefghijk')
-    k2 = Key('/abcdefghijki')
-    k3 = Key('/ab/cd/ef/abcdefghijk')
-    k4 = Key('/ab/cd/ef/abcdefghijki')
+    k1 = kwargs.pop('k1')
+    k2 = kwargs.pop('k2')
+    k3 = kwargs.pop('k3')
+    k4 = kwargs.pop('k4')
 
     ds = DictDatastore()
-    np = datastore.NestedPathDatastore(ds, depth=3, length=2)
+    np = datastore.NestedPathDatastore(ds, **kwargs)
 
     self.assertFalse(ds.contains(k1))
     self.assertFalse(ds.contains(k2))
@@ -343,8 +343,6 @@ class TestNestedPathDatastore(TestDatastore):
 
     np.put(k1, k1)
     np.put(k2, k2)
-
-    print ds._items
 
     self.assertFalse(ds.contains(k1))
     self.assertFalse(ds.contains(k2))
@@ -404,6 +402,44 @@ class TestNestedPathDatastore(TestDatastore):
     self.assertFalse(np.contains(k2))
     self.assertFalse(np.contains(k3))
     self.assertFalse(np.contains(k4))
+
+
+  def test_3_2(self):
+
+    opts = {}
+    opts['k1'] = Key('/abcdefghijk')
+    opts['k2'] = Key('/abcdefghijki')
+    opts['k3'] = Key('/ab/cd/ef/abcdefghijk')
+    opts['k4'] = Key('/ab/cd/ef/abcdefghijki')
+    opts['depth'] = 3
+    opts['length'] = 2
+
+    self.subtest_nested_path_ds(**opts)
+
+  def test_5_3(self):
+
+    opts = {}
+    opts['k1'] = Key('/abcdefghijk')
+    opts['k2'] = Key('/abcdefghijki')
+    opts['k3'] = Key('/abc/def/ghi/jka/bcd/abcdefghijk')
+    opts['k4'] = Key('/abc/def/ghi/jki/abc/abcdefghijki')
+    opts['depth'] = 5
+    opts['length'] = 3
+
+    self.subtest_nested_path_ds(**opts)
+
+  def test_keyfn(self):
+
+    opts = {}
+    opts['k1'] = Key('/abcdefghijk')
+    opts['k2'] = Key('/abcdefghijki')
+    opts['k3'] = Key('/kj/ih/gf/abcdefghijk')
+    opts['k4'] = Key('/ik/ji/hg/abcdefghijki')
+    opts['depth'] = 3
+    opts['length'] = 2
+    opts['keyfn'] = lambda key: key.name[::-1]
+
+    self.subtest_nested_path_ds(**opts)
 
 
 class TestDatastoreCollection(TestDatastore):
