@@ -2,6 +2,7 @@
 import unittest
 
 import datastore
+from datastore import DictDatastore
 from datastore import Key
 from datastore import Query
 
@@ -111,9 +112,9 @@ class TestDictionaryDatastore(TestDatastore):
 
   def test_dictionary(self):
 
-    s1 = datastore.DictDatastore()
-    s2 = datastore.DictDatastore()
-    s3 = datastore.DictDatastore()
+    s1 = DictDatastore()
+    s2 = DictDatastore()
+    s3 = DictDatastore()
     stores = [s1, s2, s3]
 
     self.subtest_simple(stores)
@@ -123,9 +124,9 @@ class TestKeyTransformDatastore(TestDatastore):
 
   def test_simple(self):
 
-    s1 = datastore.KeyTransformDatastore(datastore.DictDatastore())
-    s2 = datastore.KeyTransformDatastore(datastore.DictDatastore())
-    s3 = datastore.KeyTransformDatastore(datastore.DictDatastore())
+    s1 = datastore.KeyTransformDatastore(DictDatastore())
+    s2 = datastore.KeyTransformDatastore(DictDatastore())
+    s3 = datastore.KeyTransformDatastore(DictDatastore())
     stores = [s1, s2, s3]
 
     self.subtest_simple(stores)
@@ -135,7 +136,7 @@ class TestKeyTransformDatastore(TestDatastore):
     def transform(key):
       return key.reverse
 
-    ds = datastore.DictDatastore()
+    ds = DictDatastore()
     kt = datastore.KeyTransformDatastore(ds, keytransform=transform)
 
     k1 = Key('/a/b/c')
@@ -174,7 +175,7 @@ class TestKeyTransformDatastore(TestDatastore):
     def transform(key):
       return Key(str(key).lower())
 
-    ds = datastore.DictDatastore()
+    ds = DictDatastore()
     lds = datastore.KeyTransformDatastore(ds, keytransform=transform)
 
     k1 = Key('hello')
@@ -208,9 +209,9 @@ class TestLowercaseKeyDatastore(TestDatastore):
 
   def test_simple(self):
 
-    s1 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
-    s2 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
-    s3 = datastore.LowercaseKeyDatastore(datastore.DictDatastore())
+    s1 = datastore.LowercaseKeyDatastore(DictDatastore())
+    s2 = datastore.LowercaseKeyDatastore(DictDatastore())
+    s3 = datastore.LowercaseKeyDatastore(DictDatastore())
     stores = [s1, s2, s3]
 
     self.subtest_simple(stores)
@@ -218,7 +219,7 @@ class TestLowercaseKeyDatastore(TestDatastore):
 
   def test_lowercase(self):
 
-    ds = datastore.DictDatastore()
+    ds = DictDatastore()
     lds = datastore.LowercaseKeyDatastore(ds)
 
     k1 = Key('hello')
@@ -251,9 +252,9 @@ class TestNamespaceDatastore(TestDatastore):
 
   def test_simple(self):
 
-    s1 = datastore.NamespaceDatastore(Key('a'), datastore.DictDatastore())
-    s2 = datastore.NamespaceDatastore(Key('b'), datastore.DictDatastore())
-    s3 = datastore.NamespaceDatastore(Key('c'), datastore.DictDatastore())
+    s1 = datastore.NamespaceDatastore(Key('a'), DictDatastore())
+    s2 = datastore.NamespaceDatastore(Key('b'), DictDatastore())
+    s3 = datastore.NamespaceDatastore(Key('c'), DictDatastore())
     stores = [s1, s2, s3]
 
     self.subtest_simple(stores)
@@ -265,7 +266,7 @@ class TestNamespaceDatastore(TestDatastore):
     k2 = Key('/a/b')
     k3 = Key('/a/b/c/d')
 
-    ds = datastore.DictDatastore()
+    ds = DictDatastore()
     nd = datastore.NamespaceDatastore(k2, ds)
 
     ds.put(k1, 'cd')
@@ -294,9 +295,9 @@ class TestDatastoreCollection(TestDatastore):
 
   def test_tiered(self):
 
-    s1 = datastore.DictDatastore()
-    s2 = datastore.DictDatastore()
-    s3 = datastore.DictDatastore()
+    s1 = DictDatastore()
+    s2 = DictDatastore()
+    s3 = DictDatastore()
     ts = datastore.TieredDatastore([s1, s2, s3])
 
     k1 = Key('1')
@@ -357,11 +358,11 @@ class TestDatastoreCollection(TestDatastore):
 
   def test_sharded(self, numelems=1000):
 
-    s1 = datastore.DictDatastore()
-    s2 = datastore.DictDatastore()
-    s3 = datastore.DictDatastore()
-    s4 = datastore.DictDatastore()
-    s5 = datastore.DictDatastore()
+    s1 = DictDatastore()
+    s2 = DictDatastore()
+    s3 = DictDatastore()
+    s4 = DictDatastore()
+    s5 = DictDatastore()
     stores = [s1, s2, s3, s4, s5]
     hash = lambda key: int(key.name) * len(stores) / numelems
     sharded = datastore.ShardedDatastore(stores, shardingfn=hash)
