@@ -110,10 +110,10 @@ def monkey_patch_bson(bson=None):
     import bson
 
   if not hasattr(bson, 'loads'):
-    bson.loads = lambda document: bson.BSON.encode(document)
+    bson.loads = lambda bsondoc: bson.BSON(bsondoc).decode()
 
   if not hasattr(bson, 'dumps'):
-    bson.dumps = lambda bsondoc: bson.BSON(bsondoc).decode()
+    bson.dumps = lambda document: bson.BSON.encode(document)
 
 
 
