@@ -31,14 +31,16 @@ The :ref:`api` contains documentation of the core library.
 
    api/index
 
-:py:mod:`impl Package <datastore.impl>` contains reference to multiple datastore
-implementations included with this datastore.
 
+Package Hierarchy:
 
 .. toctree::
-   :maxdepth: 3
+   :maxdepth: 4
 
-   package/datastore.impl
+   package/datastore
+
+The :py:mod:`impl Package <datastore.impl>` contains reference to multiple
+datastore implementations included with this datastore.
 
 
 Install
