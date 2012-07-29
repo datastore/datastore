@@ -22,6 +22,7 @@ from basic import DictDatastore
 from basic import InterfaceMappingDatastore
 
 from basic import ShimDatastore
+from basic import CacheShimDatastore
 from basic import KeyTransformDatastore
 from basic import LowercaseKeyDatastore
 from basic import NamespaceDatastore

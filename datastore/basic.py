@@ -360,6 +360,51 @@ class ShimDatastore(Datastore):
 
 
 
+
+class CacheShimDatastore(ShimDatastore):
+  '''Wraps a datastore with a caching shim optimizes some calls.'''
+
+  def __init__(self, *args, **kwargs):
+
+    self.cache_datastore = kwargs.pop('cache')
+
+    if not isinstance(self.cache_datastore, Datastore):
+      errstr = 'datastore must be of type %s. Got %s.'
+      raise TypeError(errstr % (Datastore, self.cache_datastore))
+
+    super(CacheShimDatastore, self).__init__(*args, **kwargs)
+
+  def get(self, key):
+    '''Return the object named by key or None if it does not exist.
+       CacheShimDatastore first checks its ``cache_datastore``.
+    '''
+    value = self.cache_datastore.get(key)
+    return value if value is not None else self.child_datastore.get(key)
+
+  def put(self, key, value):
+    '''Stores the object `value` named by `key`self.
+       Writes to both ``cache_datastore`` and ``child_datastore``.
+    '''
+    self.cache_datastore.put(key, value)
+    self.child_datastore.put(key, value)
+
+  def delete(self, key):
+    '''Removes the object named by `key`.
+       Writes to both ``cache_datastore`` and ``child_datastore``.
+    '''
+    self.cache_datastore.delete(key)
+    self.child_datastore.delete(key)
+
+  def contains(self, key):
+    '''Returns whether the object named by `key` exists.
+       First checks ``cache_datastore``.
+    '''
+    return self.cache_datastore.contains(key) \
+        or self.child_datastore.contains(key)
+
+
+
+
 class KeyTransformDatastore(ShimDatastore):
   '''Represents a simple ShimDatastore that applies a transform on all incoming
      keys. For example:

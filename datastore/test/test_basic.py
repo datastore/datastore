@@ -141,6 +141,31 @@ class TestDictionaryDatastore(TestDatastore):
     self.subtest_simple(stores)
 
 
+
+class TestCacheShimDatastore(TestDatastore):
+
+  def test_simple(self):
+    from datastore import CacheShimDatastore
+    from datastore import NullDatastore
+
+    class NullMinusQueryDatastore(NullDatastore):
+      def query(self, query):
+        raise NotImplementedError
+
+    # make sure the cache is used
+    s1 = CacheShimDatastore(NullMinusQueryDatastore(), cache=DictDatastore())
+
+    # make sure the cache is not relief upon
+    s2 = CacheShimDatastore(DictDatastore(), cache=NullDatastore())
+
+    # make sure the cache works in tandem
+    s3 = CacheShimDatastore(DictDatastore(), cache=DictDatastore())
+
+    self.subtest_simple([s1, s2, s3])
+
+
+
+
 class TestKeyTransformDatastore(TestDatastore):
 
   def test_simple(self):
