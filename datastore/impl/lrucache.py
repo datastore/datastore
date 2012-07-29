@@ -7,7 +7,26 @@ __author__ = 'Juan Batiz-Benet <juan@benet.ai>'
 
 
 class LRUCache(datastore.Datastore):
-  '''Represents an LRU cache datastore, backed by pylru.'''
+  '''Represents an LRU cache datastore, backed by pylru.
+
+     Hello World:
+
+       >>> import datastore
+       >>> from datastore.impl.lrucache import LRUCache
+       >>>
+       >>> ds = LRUCache(100)
+       >>>
+       >>> hello = datastore.Key('hello')
+       >>> ds.put(hello, 'world')
+       >>> ds.contains(hello)
+       True
+       >>> ds.get(hello)
+       'world'
+       >>> ds.delete(hello)
+       >>> ds.get(hello)
+       None
+
+  '''
 
   def __init__(self, size):
     self._cache = pylru.lrucache(size)
@@ -43,23 +62,3 @@ class LRUCache(datastore.Datastore):
     # entire dataset already in memory, so ok to apply query naively
     return query(self._cache.values())
 
-
-'''
-Hello World:
-
-    >>> import datastore
-    >>> from datastore.impl.lrucache import LRUCache
-    >>>
-    >>> ds = LRUCache(100)
-    >>>
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
-'''
