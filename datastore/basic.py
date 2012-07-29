@@ -89,6 +89,29 @@ class Datastore(object):
 
 
 
+class NullDatastore(Datastore):
+  '''Stores nothing, but conforms to the API. Useful to test with.'''
+
+  def get(self, key):
+    '''Return the object named by key or None if it does not exist (None).'''
+    return None
+
+  def put(self, key, value):
+    '''Store the object `value` named by `key` (does nothing).'''
+    pass
+
+  def delete(self, key):
+    '''Remove the object named by `key` (does nothing).'''
+    pass
+
+  def query(self, query):
+    '''Returns an iterable of objects matching criteria in `query` (empty).'''
+    return query([])
+
+
+
+
+
 class DictDatastore(Datastore):
   '''Simple straw-man in-memory datastore backed by nested dicts.'''
 

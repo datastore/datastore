@@ -110,6 +110,25 @@ class TestDatastore(unittest.TestCase):
     checkLength(0)
 
 
+class TestNullDatastore(unittest.TestCase):
+
+  def test_null(self):
+
+    s = datastore.NullDatastore()
+
+    for c in range(1, 20):
+      c = str(c)
+      k = Key(c)
+      self.assertFalse(s.contains(k))
+      self.assertEqual(s.get(k), None)
+      s.put(k, c)
+      self.assertFalse(s.contains(k))
+      self.assertEqual(s.get(k), None)
+
+    for item in s.query(Query(Key('/'))):
+      raise Exception('Should not have found anything.')
+
+
 class TestDictionaryDatastore(TestDatastore):
 
   def test_dictionary(self):

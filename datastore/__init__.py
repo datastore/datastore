@@ -17,6 +17,7 @@ from key import Namespace
 
 import basic
 from basic import Datastore
+from basic import NullDatastore
 from basic import DictDatastore
 from basic import InterfaceMappingDatastore
 
