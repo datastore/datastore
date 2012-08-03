@@ -2,7 +2,7 @@
 
 from setuptools import setup, find_packages
 
-__version__ = '0.2.7'
+__version__ = '0.2.8'
 # don't forget to update datastore/__init__.py
 
 packages = filter(lambda p: p.startswith('datastore'), find_packages())
@@ -17,7 +17,6 @@ setup(
   keywords=["datastore", "unified api", "memcached", "redis", "git", "mongo"],
   packages=packages,
   install_requires=["smhasher"],
-  extras_requires=["bson", "nanotime"],
   license="MIT License",
   classifiers=[
     "Topic :: Database :: Front-Ends"
