@@ -88,6 +88,16 @@ class Key(object):
     return self._list
 
   @property
+  def reverse(self):
+    '''Returns the reverse of this Key.
+
+        >>> Key('/Comedy/MontyPython/Actor:JohnCleese').reverse
+        Key('/Actor:JohnCleese/MontyPython/Comedy')
+
+    '''
+    return Key(self.list[::-1])
+
+  @property
   def namespaces(self):
     '''Returns the list of namespaces of this Key.'''
     return self.list
@@ -118,16 +128,6 @@ class Key(object):
     if '/' in self._string:
       return Key(self.list[:-1])
     raise ValueError('%s is base key (it has no parent)' % repr(self))
-
-  @property
-  def reverse(self):
-    '''Returns the reverse of this Key.
-
-        >>> Key('/Comedy/MontyPython/Actor:JohnCleese').reverse
-        Key('/Actor:JohnCleese/MontyPython/Comedy')
-
-    '''
-    return Key(self.list[::-1])
 
   def child(self, other):
     '''Returns the child Key by appending namespace `other`.
