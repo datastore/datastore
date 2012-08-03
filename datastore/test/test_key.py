@@ -22,6 +22,7 @@ class KeyTests(unittest.TestCase):
     ktype = lastNamespace[0] if len(lastNamespace) > 1 else ''
     name = lastNamespace[-1]
     path = fixedString.rsplit('/', 1)[0] + '/' + ktype
+    instance = fixedString + ':' + 'c'
 
     self.assertEqual(Key(string)._string, fixedString)
     self.assertEqual(Key(string), Key(string))
@@ -29,6 +30,7 @@ class KeyTests(unittest.TestCase):
     self.assertEqual(repr(Key(string)), "Key('%s')" % fixedString)
     self.assertEqual(Key(string).name, name)
     self.assertEqual(Key(string).type, ktype)
+    self.assertEqual(Key(string).instance('c'), Key(instance))
     self.assertEqual(Key(string).path, Key(path))
     self.assertEqual(Key(string), eval(repr(Key(string))))
 

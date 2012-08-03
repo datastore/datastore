@@ -112,6 +112,11 @@ class Key(object):
     '''Returns the type of this Key, the field of the last namespace.'''
     return Namespace(self.list[-1]).field
 
+  def instance(self, other):
+    '''Returns an instance Key, by appending a name to the namespace.'''
+    assert '/' not in str(other)
+    return Key(str(self) + ':' + str(other))
+
   @property
   def path(self):
     '''Returns the path of this Key, the parent and the type.'''
