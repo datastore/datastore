@@ -12,10 +12,14 @@ packages = filter(lambda p: p.startswith(pkgname), find_packages())
 
 # convert the readme to pypi compatible rst
 try:
-  import pypandoc
-  readme = pypandoc.convert('README.md', 'rst')
-except ImportError:
-  readme = open('README.md').read()
+  try:
+    import pypandoc
+    readme = pypandoc.convert('README.md', 'rst')
+  except ImportError:
+    readme = open('README.md').read()
+except:
+  print 'something went wrong reading the README.md file.'
+  readme = ''
 
 setup(
   name=pkgname,
