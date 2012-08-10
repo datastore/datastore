@@ -20,7 +20,8 @@ except ImportError:
 setup(
   name=pkgname,
   version=metadata['version'],
-  description="simple, unified API for multiple data stores",
+  description='simple, unified API for multiple data stores',
+  long_description=readme,
   author=metadata['author'],
   author_email=metadata['email'],
   url='http://github.com/jbenet/datastore',
