@@ -1,6 +1,7 @@
 
-__version__ = '0.2.8'
-__author__ = 'Juan Batiz-Benet <juan@benet.ai>'
+__version__ = '0.2.9'
+__author__ = 'Juan Batiz-Benet'
+__email__ = 'juan@benet.ai'
 
 __doc__ = '''
 datastore is a generic layer of abstraction for data store and database access.

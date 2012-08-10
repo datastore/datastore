@@ -1,24 +1,39 @@
 #!/usr/bin/env python
 
+import re
 from setuptools import setup, find_packages
 
-__version__ = '0.2.8'
-# don't forget to update datastore/__init__.py
+pkgname = 'datastore'
 
-packages = filter(lambda p: p.startswith('datastore'), find_packages())
+# gather the package information
+main_py = open('%s/__init__.py' % pkgname).read()
+metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", main_py))
+packages = filter(lambda p: p.startswith(pkgname), find_packages())
+
+# convert the readme to pypi compatible rst
+try:
+  import pypandoc
+  readme = pypandoc.convert('README.md', 'rst')
+except ImportError:
+  readme = open('README.md').read()
 
 setup(
-  name="datastore",
-  version=__version__,
+  name=pkgname,
+  version=metadata['version'],
   description="simple, unified API for multiple data stores",
-  author="Juan Batiz-Benet",
-  author_email="juan@benet.ai",
-  url="http://github.com/jbenet/datastore",
-  keywords=["datastore", "unified api", "memcached", "redis", "git", "mongo"],
+  author=metadata['author'],
+  author_email=metadata['email'],
+  url='http://github.com/jbenet/datastore',
+  keywords=[
+    'datastore',
+    'unified api',
+    'database',
+  ],
   packages=packages,
-  install_requires=["smhasher"],
-  license="MIT License",
+  install_requires=['smhasher==0.136.2'],
+  license='MIT License',
   classifiers=[
-    "Topic :: Database :: Front-Ends"
+    'Topic :: Database',
+    'Topic :: Database :: Front-Ends',
   ]
 )
