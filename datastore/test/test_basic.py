@@ -486,6 +486,208 @@ class TestNestedPathDatastore(TestDatastore):
     self.subtest_nested_path_ds(**opts)
 
 
+
+class TestSymlinkDatastore(TestDatastore):
+
+  def test_simple(self):
+
+    s1 = datastore.SymlinkDatastore(DictDatastore())
+    s2 = datastore.SymlinkDatastore(DictDatastore())
+    s3 = datastore.SymlinkDatastore(DictDatastore())
+    s4 = datastore.SymlinkDatastore(DictDatastore())
+    stores = [s1, s2, s3, s4]
+
+    self.subtest_simple(stores)
+
+
+  def test_symlink_basic(self):
+
+    dds = DictDatastore()
+    sds = datastore.SymlinkDatastore(dds)
+
+    a = datastore.Key('/A')
+    b = datastore.Key('/B')
+
+    sds.put(a, 1)
+    self.assertEqual(sds.get(a), 1)
+    self.assertEqual(sds.get(b), None)
+    self.assertNotEqual(sds.get(b), sds.get(a))
+
+    sds.link(a, b)
+    self.assertEqual(sds.get(a), 1)
+    self.assertEqual(sds.get(b), 1)
+    self.assertEqual(sds.get(a), sds.get(b))
+
+    sds.put(b, 2)
+    self.assertEqual(sds.get(a), 2)
+    self.assertEqual(sds.get(b), 2)
+    self.assertEqual(sds.get(a), sds.get(b))
+
+    sds.delete(a)
+    self.assertEqual(sds.get(a), None)
+    self.assertEqual(sds.get(b), None)
+    self.assertEqual(sds.get(b), sds.get(a))
+
+    sds.put(a, 3)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), 3)
+    self.assertEqual(sds.get(b), sds.get(a))
+
+    sds.delete(b)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), None)
+    self.assertNotEqual(sds.get(b), sds.get(a))
+
+  def test_symlink_internals(self):
+
+    dds = DictDatastore()
+    sds = datastore.SymlinkDatastore(dds)
+
+    a = datastore.Key('/A')
+    b = datastore.Key('/B')
+    c = datastore.Key('/C')
+    d = datastore.Key('/D')
+
+    lva = sds._link_value_for_key(a)
+    lvb = sds._link_value_for_key(b)
+    lvc = sds._link_value_for_key(c)
+    lvd = sds._link_value_for_key(d)
+
+    # helper to check queries
+    sds_query = lambda: list(sds.query(Query(Key('/'))))
+    dds_query = lambda: list(dds.query(Query(Key('/'))))
+
+    # ensure _link_value_for_key and _link_for_value work
+    self.assertEqual(lva, str(a.child(sds.sentinel)))
+    self.assertEqual(a, sds._link_for_value(lva))
+
+    # adding a value should work like usual
+    sds.put(a, 1)
+    self.assertEqual(sds.get(a), 1)
+    self.assertEqual(sds.get(b), None)
+    self.assertNotEqual(sds.get(b), sds.get(a))
+
+    self.assertEqual(dds.get(a), 1)
+    self.assertEqual(dds.get(b), None)
+
+    self.assertEqual(sds_query(), [1])
+    self.assertEqual(dds_query(), [1])
+
+    # _follow_link(sds._link_value_for_key(a)) should == get(a)
+    self.assertEqual(sds._follow_link(lva), 1)
+    self.assertEqual(list(sds._follow_link_gen([lva])), [1])
+
+    # linking keys should work
+    sds.link(a, b)
+    self.assertEqual(sds.get(a), 1)
+    self.assertEqual(sds.get(b), 1)
+    self.assertEqual(sds.get(a), sds.get(b))
+
+    self.assertEqual(dds.get(a), 1)
+    self.assertEqual(dds.get(b), lva)
+
+    self.assertEqual(sds_query(), [1, 1])
+    self.assertEqual(dds_query(), [1, lva])
+
+    # changing link should affect source
+    sds.put(b, 2)
+    self.assertEqual(sds.get(a), 2)
+    self.assertEqual(sds.get(b), 2)
+    self.assertEqual(sds.get(a), sds.get(b))
+
+    self.assertEqual(dds.get(a), 2)
+    self.assertEqual(dds.get(b), lva)
+
+    self.assertEqual(sds_query(), [2, 2])
+    self.assertEqual(dds_query(), [2, lva])
+
+    # deleting source should affect link
+    sds.delete(a)
+    self.assertEqual(sds.get(a), None)
+    self.assertEqual(sds.get(b), None)
+    self.assertEqual(sds.get(b), sds.get(a))
+
+    self.assertEqual(dds.get(a), None)
+    self.assertEqual(dds.get(b), lva)
+
+    self.assertEqual(sds_query(), [None])
+    self.assertEqual(dds_query(), [lva])
+
+    # putting back source should yield working link
+    sds.put(a, 3)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), 3)
+    self.assertEqual(sds.get(b), sds.get(a))
+
+    self.assertEqual(dds.get(a), 3)
+    self.assertEqual(dds.get(b), lva)
+
+    self.assertEqual(sds_query(), [3, 3])
+    self.assertEqual(dds_query(), [3, lva])
+
+
+    # deleting link should not affect source
+    sds.delete(b)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), None)
+    self.assertNotEqual(sds.get(b), sds.get(a))
+
+    self.assertEqual(dds.get(a), 3)
+    self.assertEqual(dds.get(b), None)
+
+    self.assertEqual(sds_query(), [3])
+    self.assertEqual(dds_query(), [3])
+
+    # linking should bring back to normal
+    sds.link(a, b)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), 3)
+    self.assertEqual(sds.get(b), sds.get(a))
+
+    self.assertEqual(dds.get(a), 3)
+    self.assertEqual(dds.get(b), lva)
+
+    self.assertEqual(sds_query(), [3, 3])
+    self.assertEqual(dds_query(), [3, lva])
+
+    # Adding another link should not affect things.
+    sds.link(a, c)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), 3)
+    self.assertEqual(sds.get(c), 3)
+    self.assertEqual(sds.get(a), sds.get(b))
+    self.assertEqual(sds.get(a), sds.get(c))
+
+    self.assertEqual(dds.get(a), 3)
+    self.assertEqual(dds.get(b), lva)
+    self.assertEqual(dds.get(c), lva)
+
+    self.assertEqual(sds_query(), [3, 3, 3])
+    self.assertEqual(dds_query(), [3, lva, lva])
+
+    # linking should be transitive
+    sds.link(b, c)
+    sds.link(c, d)
+    self.assertEqual(sds.get(a), 3)
+    self.assertEqual(sds.get(b), 3)
+    self.assertEqual(sds.get(c), 3)
+    self.assertEqual(sds.get(d), 3)
+    self.assertEqual(sds.get(a), sds.get(b))
+    self.assertEqual(sds.get(a), sds.get(c))
+    self.assertEqual(sds.get(a), sds.get(d))
+
+    self.assertEqual(dds.get(a), 3)
+    self.assertEqual(dds.get(b), lva)
+    self.assertEqual(dds.get(c), lvb)
+    self.assertEqual(dds.get(d), lvc)
+
+    self.assertEqual(sds_query(), [3, 3, 3, 3])
+    self.assertEqual(set(dds_query()), set([3, lva, lvb, lvc]))
+
+    self.assertRaises(AssertionError, sds.link, d, a)
+
+
+
 class TestDatastoreCollection(TestDatastore):
 
   def test_tiered(self):

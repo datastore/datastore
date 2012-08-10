@@ -622,6 +622,119 @@ class NestedPathDatastore(KeyTransformDatastore):
 
 
 
+class SymlinkDatastore(ShimDatastore):
+  '''Datastore that creates filesystem-like symbolic link keys.
+
+  A symbolic link key is a way of naming the same value with multiple keys.
+
+  For example:
+
+      >>> import datastore
+      >>>
+      >>> dds = datastore.DictDatastore()
+      >>> sds = datastore.SymlinkDatastore(dds)
+      >>>
+      >>> a = datastore.Key('/A')
+      >>> b = datastore.Key('/B')
+      >>>
+      >>> sds.put(a, 1)
+      >>> sds.get(a)
+      1
+      >>> sds.link(a, b)
+      >>> sds.get(b)
+      1
+      >>> sds.put(b, 2)
+      >>> sds.get(b)
+      2
+      >>> sds.get(a)
+      2
+      >>> sds.delete(a)
+      >>> sds.get(a)
+      None
+      >>> sds.get(b)
+      None
+      >>> sds.put(a, 3)
+      >>> sds.get(a)
+      3
+      >>> sds.get(b)
+      3
+      >>> sds.delete(b)
+      >>> sds.get(b)
+      None
+      >>> sds.get(a)
+      3
+
+  '''
+  sentinel = 'datastore_link'
+
+  def _link_value_for_key(self, source_key):
+    '''Returns the link value for given `key`.'''
+    return str(source_key.child(self.sentinel))
+
+
+  def _link_for_value(self, value):
+    '''Returns the linked key if `value` is a link, or None.'''
+    try:
+      key = Key(value)
+      if key.name == self.sentinel:
+        return key.parent
+    except:
+      pass
+    return None
+
+
+  def _follow_link(self, value):
+    '''Returns given `value` or, if it is a symlink, the `value` it names.'''
+    seen_keys = set()
+    while True:
+      link_key = self._link_for_value(value)
+      if not link_key:
+        return value
+
+      assert link_key not in seen_keys, 'circular symlink reference'
+      seen_keys.add(link_key)
+      value = super(SymlinkDatastore, self).get(link_key)
+
+  def _follow_link_gen(self, iterable):
+    '''A generator that follows links in values encountered.'''
+    for item in iterable:
+      yield self._follow_link(item)
+
+
+  def link(self, source_key, target_key):
+    '''Creates a symbolic link key pointing from `target_key` to `source_key`'''
+    link_value = self._link_value_for_key(source_key)
+
+    # put straight into the child, to avoid following previous links.
+    self.child_datastore.put(target_key, link_value)
+
+    # exercise the link. ensure there are no cycles.
+    self.get(target_key)
+
+
+  def get(self, key):
+    '''Return the object named by `key. Follows links.'''
+    value = super(SymlinkDatastore, self).get(key)
+    return self._follow_link(value)
+
+  def put(self, key, value):
+    '''Stores the object named by `key`. Follows links.'''
+    # if `key` points to a symlink, need to follow it.
+    current_value = super(SymlinkDatastore, self).get(key)
+    link_key = self._link_for_value(current_value)
+    if link_key:
+      self.put(link_key, value) # self.put: could be another link.
+    else:
+      super(SymlinkDatastore, self).put(key, value)
+
+  def query(self, query):
+    '''Returns objects matching criteria expressed in `query`. Follows links.'''
+    results = super(SymlinkDatastore, self).query(query)
+    return self._follow_link_gen(results)
+
+
+
+
 
 class DatastoreCollection(ShimDatastore):
   '''Represents a collection of datastores.'''
