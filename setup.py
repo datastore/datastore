@@ -36,6 +36,7 @@ setup(
   ],
   packages=packages,
   install_requires=['smhasher==0.136.2'],
+  test_suite='datastore.test',
   license='MIT License',
   classifiers=[
     'Topic :: Database',
