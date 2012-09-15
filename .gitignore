@@ -4,3 +4,4 @@ datastore.egg-info
 dist
 .tm_properties
 pypi/
+.tox
