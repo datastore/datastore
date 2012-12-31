@@ -301,7 +301,7 @@ for generality and will most likely not be implemented across other datastores.
 
 When implementings such features, please remember the goal of this project:
 simple, unified API for multiple data stores. When making heavy use of a
-particular library's specific functionality, perhpas one should not use
+particular library's specific functionality, perhaps one should not use
 datastore and should directly use that library.
 
 ### Key
@@ -312,7 +312,7 @@ Our Key scheme is inspired by file systems and the Google App Engine key
 model.
 
 Keys are meant to be unique across a system. Keys are hierarchical,
-incorporating more and more specific namespaces. Thus keys can be deemed
+incorporating increasingly specific namespaces. Thus keys can be deemed
 'children' or 'ancestors' of other keys.
 
     Key('/Comedy')
