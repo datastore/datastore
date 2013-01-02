@@ -1,5 +1,6 @@
 
 import unittest
+import logging
 
 import datastore
 from datastore import DictDatastore
@@ -162,6 +163,23 @@ class TestCacheShimDatastore(TestDatastore):
     s3 = CacheShimDatastore(DictDatastore(), cache=DictDatastore())
 
     self.subtest_simple([s1, s2, s3])
+
+
+class TestLoggingDatastore(TestDatastore):
+
+  def test_simple(self):
+    from datastore import LoggingDatastore
+
+    class NullLogger(logging.getLoggerClass()):
+      def debug(self, *args, **kwargs): pass
+      def info(self, *args, **kwargs): pass
+      def warning(self, *args, **kwargs): pass
+      def error(self, *args, **kwargs): pass
+      def critical(self, *args, **kwargs): pass
+
+    s1 = LoggingDatastore(DictDatastore(), logger=NullLogger('null'))
+    s2 = LoggingDatastore(DictDatastore())
+    self.subtest_simple([s1, s2])
 
 
 

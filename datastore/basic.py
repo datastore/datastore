@@ -404,6 +404,59 @@ class CacheShimDatastore(ShimDatastore):
 
 
 
+class LoggingDatastore(ShimDatastore):
+  '''Wraps a datastore with a logging shim.'''
+
+  def __init__(self, child_datastore, logger=None):
+
+    if not logger:
+      import logging
+      logger = logging
+
+    self.logger = logger
+
+    super(LoggingDatastore, self).__init__(child_datastore)
+
+  def get(self, key):
+    '''Return the object named by key or None if it does not exist.
+       LoggingDatastore logs the access.
+    '''
+    self.logger.info('%s: get %s' % (self, key))
+    value = super(LoggingDatastore, self).get(key)
+    self.logger.debug('%s: %s' % (self, value))
+    return value
+
+  def put(self, key, value):
+    '''Stores the object `value` named by `key`self.
+       LoggingDatastore logs the access.
+    '''
+    self.logger.info('%s: put %s' % (self, key))
+    self.logger.debug('%s: %s' % (self, value))
+    super(LoggingDatastore, self).put(key, value)
+
+  def delete(self, key):
+    '''Removes the object named by `key`.
+       LoggingDatastore logs the access.
+    '''
+    self.logger.info('%s: delete %s' % (self, key))
+    super(LoggingDatastore, self).delete(key)
+
+  def contains(self, key):
+    '''Returns whether the object named by `key` exists.
+       LoggingDatastore logs the access.
+    '''
+    self.logger.info('%s: contains %s' % (self, key))
+    return super(LoggingDatastore, self).contains(key)
+
+  def query(self, query):
+    '''Returns an iterable of objects matching criteria expressed in `query`.
+       LoggingDatastore logs the access.
+    '''
+    self.logger.info('%s: query %s' % (self, query))
+    return super(LoggingDatastore, self).query(query)
+
+
+
 
 class KeyTransformDatastore(ShimDatastore):
   '''Represents a simple ShimDatastore that applies a transform on all incoming

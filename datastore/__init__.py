@@ -1,5 +1,5 @@
 
-__version__ = '0.2.11'
+__version__ = '0.2.12'
 __author__ = 'Juan Batiz-Benet'
 __email__ = 'juan@benet.ai'
 
@@ -24,6 +24,7 @@ from basic import InterfaceMappingDatastore
 
 from basic import ShimDatastore
 from basic import CacheShimDatastore
+from basic import LoggingDatastore
 from basic import KeyTransformDatastore
 from basic import LowercaseKeyDatastore
 from basic import NamespaceDatastore
