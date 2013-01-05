@@ -705,6 +705,70 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertRaises(AssertionError, sds.link, d, a)
 
 
+  def test_symlink_recursive(self):
+
+    dds = DictDatastore()
+    sds1 = datastore.SymlinkDatastore(dds)
+    sds2 = datastore.SymlinkDatastore(sds1)
+
+    a = datastore.Key('/A')
+    b = datastore.Key('/B')
+
+    sds2.put(a, 1)
+    self.assertEqual(sds2.get(a), 1)
+    self.assertEqual(sds2.get(b), None)
+    self.assertNotEqual(sds2.get(b), sds2.get(a))
+
+    sds2.link(a, b)
+    self.assertEqual(sds2.get(a), 1)
+    self.assertEqual(sds2.get(b), 1)
+    self.assertEqual(sds2.get(a), sds2.get(b))
+    self.assertEqual(sds1.get(a), sds1.get(b))
+
+    sds2.link(a, b)
+    self.assertEqual(sds2.get(a), 1)
+    self.assertEqual(sds2.get(b), 1)
+    self.assertEqual(sds2.get(a), sds2.get(b))
+    self.assertEqual(sds1.get(a), sds1.get(b))
+
+    sds2.link(a, b)
+    self.assertEqual(sds2.get(a), 1)
+    self.assertEqual(sds2.get(b), 1)
+    self.assertEqual(sds2.get(a), sds2.get(b))
+    self.assertEqual(sds1.get(a), sds1.get(b))
+
+    sds2.put(b, 2)
+    self.assertEqual(sds2.get(a), 2)
+    self.assertEqual(sds2.get(b), 2)
+    self.assertEqual(sds2.get(a), sds2.get(b))
+    self.assertEqual(sds1.get(a), sds1.get(b))
+
+    sds2.delete(a)
+    self.assertEqual(sds2.get(a), None)
+    self.assertEqual(sds2.get(b), None)
+    self.assertEqual(sds2.get(b), sds2.get(a))
+
+    sds2.put(a, 3)
+    self.assertEqual(sds2.get(a), 3)
+    self.assertEqual(sds2.get(b), 3)
+    self.assertEqual(sds2.get(b), sds2.get(a))
+
+    sds2.delete(b)
+    self.assertEqual(sds2.get(a), 3)
+    self.assertEqual(sds2.get(b), None)
+    self.assertNotEqual(sds2.get(b), sds2.get(a))
+
+
+class TestDirectoryDatastore(TestDatastore):
+
+  def test_simple(self):
+    s1 = datastore.DirectoryDatastore(DictDatastore())
+    s2 = datastore.DirectoryDatastore(DictDatastore())
+    self.subtest_simple([s1, s2])
+
+
+
+
 
 class TestDatastoreCollection(TestDatastore):
 
