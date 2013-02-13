@@ -2,7 +2,7 @@
 import redis
 import unittest
 
-from datastore.impl.redis import RedisDatastore
+from ..impl.redis import RedisDatastore
 from test_basic import TestDatastore
 
 

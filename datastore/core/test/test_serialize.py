@@ -1,9 +1,9 @@
 
 import unittest
 
-import datastore
-
-from datastore.serialize import *
+from ..key import Key
+from ..basic import DictDatastore
+from ..serialize import *
 from test_basic import TestDatastore
 
 import pickle
@@ -45,7 +45,7 @@ class TestSerialize(TestDatastore):
 
   def subtest_serializer_shim(self, serializer, numelems=100):
 
-    child = datastore.DictDatastore()
+    child = DictDatastore()
     shim = SerializerShimDatastore(child, serializer=serializer)
 
     values_raw = [{'value': i} for i in xrange(0, numelems)]
@@ -55,7 +55,7 @@ class TestSerialize(TestDatastore):
     self.assertEqual(values_deserial, values_raw)
 
     for value in values_raw:
-      key = datastore.Key(value['value'])
+      key = Key(value['value'])
       value_serialized = serializer.dumps(value)
 
       # should not be there yet

@@ -3,8 +3,8 @@ import os
 import shutil
 import unittest
 
-from datastore.impl import git
-from datastore import serialize
+from ..impl import git
+from .. import serialize
 from test_filesystem import TestDatastore
 
 

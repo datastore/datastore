@@ -2,7 +2,7 @@
 import pymongo
 import unittest
 
-from datastore.impl.mongo import MongoDatastore
+from ..impl.mongo import MongoDatastore
 from test_basic import TestDatastore
 
 

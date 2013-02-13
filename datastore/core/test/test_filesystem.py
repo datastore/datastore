@@ -3,8 +3,8 @@ import os
 import shutil
 import unittest
 
-from datastore.impl import filesystem
-from datastore import serialize
+from ..impl import filesystem
+from .. import serialize
 from test_basic import TestDatastore
 
 

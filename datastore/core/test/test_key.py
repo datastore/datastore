@@ -2,8 +2,8 @@
 import unittest
 import random
 
-from datastore import Key
-from datastore import Namespace
+from ..key import Key
+from ..key import Namespace
 
 
 def randomString():

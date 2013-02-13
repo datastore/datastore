@@ -3,8 +3,8 @@ import redis
 import unittest
 import logging
 
-from datastore import SerializerShimDatastore
-from datastore.impl.aws import S3BucketDatastore
+from ..serialize import SerializerShimDatastore
+from ..impl.aws import S3BucketDatastore
 from boto.s3.connection import S3Connection
 from test_basic import TestDatastore
 

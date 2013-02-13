@@ -4,8 +4,8 @@ import unittest
 import hashlib
 import nanotime
 
-from datastore.key import Key
-from datastore.query import Filter, Order, Query, Cursor
+from ..key import Key
+from ..query import Filter, Order, Query, Cursor
 
 
 

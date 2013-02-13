@@ -2,7 +2,7 @@
 import pylibmc
 import unittest
 
-from datastore.impl.memcached import MemcachedDatastore
+from ..impl.memcached import MemcachedDatastore
 from test_basic import TestDatastore
 
 

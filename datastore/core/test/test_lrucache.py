@@ -1,11 +1,11 @@
 
 import unittest
 
-from datastore import Key
-from datastore import DictDatastore
-from datastore import NullDatastore
-from datastore import CacheShimDatastore
-from datastore.impl import lrucache
+from ..key import Key
+from ..basic import DictDatastore
+from ..basic import NullDatastore
+from ..basic import CacheShimDatastore
+from ..impl import lrucache
 
 from test_basic import TestDatastore
 
