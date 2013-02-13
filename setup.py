@@ -35,6 +35,7 @@ setup(
     'database',
   ],
   packages=packages,
+  namespace_packages=['datastore'],
   install_requires=['smhasher==0.136.2'],
   test_suite='datastore.test',
   license='MIT License',
