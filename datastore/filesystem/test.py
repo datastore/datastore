@@ -3,9 +3,10 @@ import os
 import shutil
 import unittest
 
-from ..impl import filesystem
-from .. import serialize
-from test_basic import TestDatastore
+from datastore import serialize
+from datastore.core.test.test_basic import TestDatastore
+
+from . import FileSystemDatastore
 
 
 class TestFileSystemDatastore(TestDatastore):
@@ -22,7 +23,7 @@ class TestFileSystemDatastore(TestDatastore):
   def test_datastore(self):
     dirs = map(str, range(0, 4))
     dirs = map(lambda d: os.path.join(self.tmp, d), dirs)
-    fses = map(filesystem.FileSystemDatastore, dirs)
+    fses = map(FileSystemDatastore, dirs)
     dses = map(serialize.shim, fses)
     self.subtest_simple(dses, numelems=500)
 
