@@ -1,11 +1,10 @@
-util Package
-============
+datastore.core.util
+===================
 
-:mod:`fasthash` Module
-----------------------
+:mod:`datastore.core.util.fasthash`
+-----------------------------------
 
 .. automodule:: datastore.util.fasthash
     :members:
     :undoc-members:
     :show-inheritance:
-

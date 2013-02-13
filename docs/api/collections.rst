@@ -35,14 +35,14 @@ Example:
     >>> import pymongo
     >>> import datastore
     >>>
-    >>> from datastore.impl.mongo import MongoDatastore
-    >>> from datastore.impl.lrucache import LRUCache
-    >>> from datastore.impl.filesystem import FileSystemDatastore
+    >>> from datastore.mongo import MongoDatastore
+    >>> from datastore.pylru import LRUCacheDatastore
+    >>> from datastore.filesystem import FileSystemDatastore
     >>>
     >>> conn = pymongo.Connection()
     >>> mongo = MongoDatastore(conn.test_db)
     >>>
-    >>> cache = LRUCache(1000)
+    >>> cache = LRUCacheDatastore(1000)
     >>> fs = FileSystemDatastore('/tmp/.test_db')
     >>>
     >>> ds = datastore.TieredDatastore([cache, mongo, fs])

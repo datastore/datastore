@@ -39,9 +39,6 @@ Package Hierarchy:
 
    package/datastore
 
-The :py:mod:`impl Package <datastore.impl>` contains reference to multiple
-datastore implementations included with this datastore.
-
 
 Install
 =======
@@ -113,90 +110,12 @@ Hello Dict
     >>> ds.get(hello)
     None
 
-Hello memcache
---------------
-
-    >>> import pylibmc
-    >>> import datastore
-    >>> from datastore.impl.memcached import MemcachedDatastore
-    >>>
-    >>> mc = pylibmc.Client(['127.0.0.1'])
-    >>> ds = MemcachedDatastore(mc)
-    >>>
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
-Hello mongo
------------
-
-    >>> import pymongo
-    >>> import datastore
-    >>> from datastore.impl.mongo import MongoDatastore
-    >>>
-    >>> conn = pymongo.Connection()
-    >>> ds = MongoDatastore(conn.test_db)
-    >>>
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
-Hello redis
------------
-
-    >>> import redis
-    >>> import datastore
-    >>> from datastore.impl.redis import RedisDatastore
-    >>> r = redis.Redis()
-    >>> ds = RedisDatastore(r)
-    >>>
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
 Hello filesystem
 ----------------
 
-    >>> import datastore
-    >>> from datastore.impl.filesystem import FileSystemDatastore
+    >>> import datastore.filesystem
     >>>
-    >>> ds = FileSystemDatastore('/tmp/.test_datastore')
-    >>>
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
-Hello git
----------
-
-    >>> import datastore
-    >>> from datastore.impl.git import GitDatastore
-    >>>
-    >>> ds = GitDatastore('/tmp/.test_datastore')
+    >>> ds = datastore.filesystem.FileSystemDatastore('/tmp/.test_datastore')
     >>>
     >>> hello = datastore.Key('hello')
     >>> ds.put(hello, 'world')
@@ -207,7 +126,6 @@ Hello git
     >>> ds.delete(hello)
     >>> ds.get(hello)
     None
-
 
 Hello Serialization
 -------------------
@@ -236,14 +154,14 @@ Hello Tiered Access
     >>> import pymongo
     >>> import datastore
     >>>
-    >>> from datastore.impl.mongo import MongoDatastore
-    >>> from datastore.impl.lrucache import LRUCache
-    >>> from datastore.impl.filesystem import FileSystemDatastore
+    >>> from datastore.mongo import MongoDatastore
+    >>> from datastore.pylru import LRUCacheDatastore
+    >>> from datastore.filesystem import FileSystemDatastore
     >>>
     >>> conn = pymongo.Connection()
     >>> mongo = MongoDatastore(conn.test_db)
     >>>
-    >>> cache = LRUCache(1000)
+    >>> cache = LRUCacheDatastore(1000)
     >>> fs = FileSystemDatastore('/tmp/.test_db')
     >>>
     >>> ds = datastore.TieredDatastore([cache, mongo, fs])

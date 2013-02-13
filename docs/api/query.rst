@@ -41,7 +41,7 @@ data storage solution that fits the application's needs now, and wrap it with a
 datastore implementation. Some applications, particularly in early development
 stages, can afford to incurr the cost of queries on non-relational databases
 (e.g. using a :py:class:`FileSystemDatastore
-<datastore.impl.filesystem.FileSystemDatastore>` and not worry about a database
+<datastore.filesystem.FileSystemDatastore>` and not worry about a database
 at all). When it comes time to switch the tool for performance, updating the
 application code can be as simple as swapping the datastore in one place, not
 all over the application code base. This gain in engineering time, both at
