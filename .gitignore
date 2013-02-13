@@ -5,3 +5,4 @@ dist
 .tm_properties
 pypi/
 .tox
+venv/
