@@ -1,5 +1,5 @@
 
-__version__ = '0.3.2'
+__version__ = '0.3.3'
 __author__ = 'Juan Batiz-Benet'
 __email__ = 'juan@benet.ai'
 
@@ -44,24 +44,20 @@ import serialize
 from serialize import SerializerShimDatastore
 
 
-def patch():
-  '''patch datastore with core variables'''
-  import datastore
-  datastore.Key = Key
-  datastore.__version__ = __version__
-  datastore.__author__ = __author__
-  datastore.__email__ == __email__
+# patch datastore with core variables
+import datastore
+datastore.__version__ = __version__
+datastore.__author__ = __author__
+datastore.__email__ = __email__
 
-  for k, v in locals().items():
-    if k in ['datastore']:
-      continue
+for k, v in locals().items():
+  if k in ['datastore']:
+    continue
 
-    if k.startswith('__'):
-      continue
+  if k.startswith('__'):
+    continue
 
-    if hasattr(datastore, k):
-      continue
+  if hasattr(datastore, k):
+    continue
 
-    setattr(datastore, k, v)
-
-patch()
+  setattr(datastore, k, v)
