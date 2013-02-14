@@ -2,7 +2,6 @@
 import unittest
 import logging
 
-import datastore
 from ..basic import DictDatastore
 from ..key import Key
 from ..query import Query

@@ -33,7 +33,7 @@ TieredDatastore
 Example:
 
     >>> import pymongo
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> from datastore.mongo import MongoDatastore
     >>> from datastore.pylru import LRUCacheDatastore
@@ -68,7 +68,7 @@ ShardedDatastore
 Example:
 
 
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> shards = [datastore.DictDatastore() for i in range(0, 10)]
     >>>

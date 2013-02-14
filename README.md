@@ -106,8 +106,8 @@ newly-built docs.
 
 ### Hello World
 
-    >>> import datastore
-    >>> ds = datastore.basic.DictDatastore()
+    >>> import datastore.core
+    >>> ds = datastore.DictDatastore()
     >>>
     >>> hello = datastore.Key('hello')
     >>> ds.put(hello, 'world')
@@ -140,7 +140,7 @@ newly-built docs.
 
 
     >>> import pymongo
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> from datastore.mongo import MongoDatastore
     >>> from datastore.pylru import LRUCacheDatastore
@@ -167,7 +167,7 @@ newly-built docs.
 
 #### Hello Sharding
 
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> shards = [datastore.DictDatastore() for i in range(0, 10)]
     >>>

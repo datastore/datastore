@@ -462,7 +462,7 @@ class KeyTransformDatastore(ShimDatastore):
   '''Represents a simple ShimDatastore that applies a transform on all incoming
      keys. For example:
 
-       >>> import datastore
+       >>> import datastore.core
        >>> def transform(key):
        ...   return key.reverse
        ...
@@ -518,7 +518,7 @@ class LowercaseKeyDatastore(KeyTransformDatastore):
   '''Represents a simple ShimDatastore that lowercases all incoming keys.
      For example:
 
-      >>> import datastore
+      >>> import datastore.core
       >>> ds = datastore.DictDatastore()
       >>> ds.put(datastore.Key('hello'), 'world')
       >>> ds.put(datastore.Key('HELLO'), 'WORLD')
@@ -554,7 +554,7 @@ class NamespaceDatastore(KeyTransformDatastore):
   '''Represents a simple ShimDatastore that namespaces all incoming keys.
      For example:
 
-      >>> import datastore
+      >>> import datastore.core
       >>>
       >>> ds = datastore.DictDatastore()
       >>> ds.put(datastore.Key('/a/b'), 'ab')
@@ -595,7 +595,7 @@ class NestedPathDatastore(KeyTransformDatastore):
     name to separate into nested namespaces. This is akin to the directory
     structure that ``git`` uses for objects. For example:
 
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> ds = datastore.DictDatastore()
     >>> np = datastore.NestedPathDatastore(ds, depth=3, length=2)
@@ -682,7 +682,7 @@ class SymlinkDatastore(ShimDatastore):
 
   For example:
 
-      >>> import datastore
+      >>> import datastore.core
       >>>
       >>> dds = datastore.DictDatastore()
       >>> sds = datastore.SymlinkDatastore(dds)
@@ -800,7 +800,7 @@ class DirectoryDatastore(ShimDatastore):
 
   For example:
 
-      >>> import datastore
+      >>> import datastore.core
       >>>
       >>> dds = datastore.DictDatastore()
       >>> rds = datastore.DirectoryDatastore(dds)
@@ -1080,7 +1080,7 @@ class ShardedDatastore(DatastoreCollection):
 Hello Tiered Access
 
     >>> import pymongo
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> from datastore.impl.mongo import MongoDatastore
     >>> from datastore.impl.lrucache import LRUCache
@@ -1106,7 +1106,7 @@ Hello Tiered Access
 
 Hello Sharding
 
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> shards = [datastore.DictDatastore() for i in range(0, 10)]
     >>>

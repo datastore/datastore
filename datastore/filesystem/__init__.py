@@ -10,7 +10,7 @@ Tested with:
 '''
 
 import os
-import datastore
+import datastore.core
 
 
 def ensure_directory_exists(directory):
@@ -49,6 +49,7 @@ class FileSystemDatastore(datastore.Datastore):
     /data/Comedy/MontyPython/Sketch/CheeseShop/Character/Mousebender.obj
 
   Implementation Notes:
+
     Separating key namespaces (and their parameters) within directories allows
     granular querying for under a specific key. For example, a query with key::
 
@@ -64,6 +65,23 @@ class FileSystemDatastore(datastore.Datastore):
 
       /data/Comedy/MontyPython/Sketch/CheeseShop.obj
       /data/Comedy/MontyPython/Sketch/CheeseShop/
+
+
+  Hello World:
+
+      >>> import datastore.filesystem
+      >>>
+      >>> ds = datastore.filesystem.FileSystemDatastore('/tmp/.test_datastore')
+      >>>
+      >>> hello = datastore.Key('hello')
+      >>> ds.put(hello, 'world')
+      >>> ds.contains(hello)
+      True
+      >>> ds.get(hello)
+      'world'
+      >>> ds.delete(hello)
+      >>> ds.get(hello)
+      None
 
   '''
 
@@ -212,25 +230,3 @@ class FileSystemDatastore(datastore.Datastore):
     '''
     path = self.object_path(key)
     return os.path.exists(path) and os.path.isfile(path)
-
-
-
-'''
-Hello World:
-
-    >>> import datastore
-    >>> from datastore.impl.filesystem import FileSystemDatastore
-    >>>
-    >>> ds = FileSystemDatastore('/tmp/.test_datastore')
-    >>>
-    >>> hello = datastore.Key('hello')
-    >>> ds.put(hello, 'world')
-    >>> ds.contains(hello)
-    True
-    >>> ds.get(hello)
-    'world'
-    >>> ds.delete(hello)
-    >>> ds.get(hello)
-    None
-
-'''

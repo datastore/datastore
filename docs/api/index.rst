@@ -27,8 +27,8 @@ Examples
 Hello World
 ___________
 
-    >>> import datastore
-    >>> ds = datastore.basic.DictDatastore()
+    >>> import datastore.core
+    >>> ds = datastore.DictDatastore()
     >>> hello = datastore.Key('hello')
     >>> ds.put(hello, 'world')
     >>> ds.contains(hello)

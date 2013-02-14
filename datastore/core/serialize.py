@@ -231,7 +231,7 @@ def shim(datastore, serializer=None):
 '''
 Hello World:
 
-    >>> import datastore
+    >>> import datastore.core
     >>> import json
     >>>
     >>> ds_child = datastore.DictDatastore()

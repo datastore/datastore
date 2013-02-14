@@ -96,9 +96,9 @@ here is Hello World in various datastores. Note the common code.
 Hello Dict
 ----------
 
-    >>> import datastore
+    >>> import datastore.core
     >>>
-    >>> ds = datastore.basic.DictDatastore()
+    >>> ds = datastore.DictDatastore()
     >>>
     >>> hello = datastore.Key('hello')
     >>> ds.put(hello, 'world')
@@ -130,7 +130,7 @@ Hello filesystem
 Hello Serialization
 -------------------
 
-    >>> import datastore
+    >>> import datastore.core
     >>> import json
     >>>
     >>> ds_child = datastore.DictDatastore()
@@ -152,7 +152,7 @@ Hello Tiered Access
 -------------------
 
     >>> import pymongo
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> from datastore.mongo import MongoDatastore
     >>> from datastore.pylru import LRUCacheDatastore
@@ -180,7 +180,7 @@ Hello Tiered Access
 Hello Sharding
 --------------
 
-    >>> import datastore
+    >>> import datastore.core
     >>>
     >>> shards = [datastore.DictDatastore() for i in range(0, 10)]
     >>>
