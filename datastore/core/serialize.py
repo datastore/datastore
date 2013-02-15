@@ -19,6 +19,11 @@ class Serializer(object):
     '''returns serialized `value`.'''
     raise NotImplementedError
 
+  @staticmethod
+  def implements_serializer_interface(cls):
+    return hasattr(cls, 'loads') and callable(cls.loads) \
+       and hasattr(cls, 'dumps') and callable(cls.dumps)
+
 
 
 class NonSerializer(Serializer):

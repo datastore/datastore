@@ -15,6 +15,7 @@ monkey_patch_bson(bson)
 
 class TestSerialize(TestDatastore):
 
+
   def test_basic(self):
 
     value = 'test_value_%s' % self
@@ -42,6 +43,7 @@ class TestSerialize(TestDatastore):
     values_serialized = map(stack.dumps, values_raw)
     values_deserialized = map(stack.loads, values_serialized)
     self.assertEqual(values_deserialized, values_raw)
+
 
   def subtest_serializer_shim(self, serializer, numelems=100):
 
@@ -87,6 +89,7 @@ class TestSerialize(TestDatastore):
     if serializer is not bson: # bson can't handle non mapping types
       self.subtest_simple([shim], numelems)
 
+
   def test_serializer_shim(self):
 
     self.subtest_serializer_shim(json)
@@ -101,6 +104,47 @@ class TestSerialize(TestDatastore):
     self.subtest_serializer_shim(Stack([json, map_serializer, bson]))
     self.subtest_serializer_shim(Stack([json, map_serializer, bson, pickle]))
 
+
+  def test_has_interface_check(self):
+    self.assertTrue(hasattr(Serializer, 'implements_serializer_interface'))
+
+
+  def test_interface_check_returns_true_for_valid_serializers(self):
+    class S(object):
+      def loads(self, foo): return foo
+      def dumps(self, foo): return foo
+
+    self.assertTrue(Serializer.implements_serializer_interface(S))
+    self.assertTrue(Serializer.implements_serializer_interface(json))
+    self.assertTrue(Serializer.implements_serializer_interface(pickle))
+    self.assertTrue(Serializer.implements_serializer_interface(Serializer))
+
+
+  def test_interface_check_returns_false_for_invalid_serializers(self):
+    class S1(object):
+      pass
+
+    class S2(object):
+      def loads(self, foo):
+        return foo
+
+    class S3(object):
+      def dumps(self, foo):
+        return foo
+
+    class S4(object):
+      def dumps(self, foo):
+        return foo
+
+    class S5(object):
+      loads = 'loads'
+      dumps = 'dumps'
+
+    self.assertFalse(Serializer.implements_serializer_interface(S1))
+    self.assertFalse(Serializer.implements_serializer_interface(S2))
+    self.assertFalse(Serializer.implements_serializer_interface(S3))
+    self.assertFalse(Serializer.implements_serializer_interface(S4))
+    self.assertFalse(Serializer.implements_serializer_interface(S5))
 
 
 if __name__ == '__main__':
