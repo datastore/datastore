@@ -30,7 +30,7 @@ from basic import LowercaseKeyDatastore
 from basic import NamespaceDatastore
 from basic import NestedPathDatastore
 from basic import SymlinkDatastore
-from basic import DirectoryDatastore
+from basic import DirectoryTreeDatastore
 
 from basic import DatastoreCollection
 from basic import ShardedDatastore

@@ -773,16 +773,15 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertNotEqual(sds2.get(b), sds2.get(a))
 
 
-class TestDirectoryDatastore(TestDatastore):
+
+class TestDirectoryTreeDatastore(TestDatastore):
 
   def test_simple(self):
-    from ..basic import DirectoryDatastore
+    from ..basic import DirectoryTreeDatastore
 
-    s1 = DirectoryDatastore(DictDatastore())
-    s2 = DirectoryDatastore(DictDatastore())
+    s1 = DirectoryTreeDatastore(DictDatastore())
+    s2 = DirectoryTreeDatastore(DictDatastore())
     self.subtest_simple([s1, s2])
-
-
 
 
 
