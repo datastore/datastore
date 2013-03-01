@@ -774,6 +774,43 @@ class TestSymlinkDatastore(TestDatastore):
 
 
 
+class TestDirectoryDatastore(TestDatastore):
+
+  def test_simple(self):
+    from ..basic import DirectoryDatastore
+
+    s1 = DirectoryDatastore(DictDatastore())
+    s2 = DirectoryDatastore(DictDatastore())
+    self.subtest_simple([s1, s2])
+
+  def test_directory_simple(self):
+    from ..basic import DirectoryDatastore
+
+    ds = DirectoryDatastore(DictDatastore())
+
+    # initialize directory at /foo
+    dir_key = Key('/foo')
+    ds.directory(dir_key)
+
+    # adding directory entries
+    ds.directoryAdd(dir_key, Key('/foo/bar'))
+    ds.directoryAdd(dir_key, Key('/foo/baz'))
+
+    gen = ds.directoryRead(dir_key)
+    self.assertEqual(gen.next(), Key('/foo/bar'))
+    self.assertEqual(gen.next(), Key('/foo/baz'))
+
+    ds.directoryRemove(dir_key, Key('/foo/bar'))
+    gen = ds.directoryRead(dir_key)
+    self.assertEqual(gen.next(), Key('/foo/baz'))
+
+    ds.directoryRemove(dir_key, Key('/foo/baz'))
+    with self.assertRaises(StopIteration):
+      gen = ds.directoryRead(dir_key)
+      gen.next()
+
+
+
 class TestDirectoryTreeDatastore(TestDatastore):
 
   def test_simple(self):

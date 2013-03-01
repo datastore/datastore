@@ -793,6 +793,86 @@ class SymlinkDatastore(ShimDatastore):
 
 
 
+class DirectoryDatastore(ShimDatastore):
+  '''Datastore that allows manual tracking of directory entries.
+
+  For example:
+    >>> ds = DirectoryDatastore(ds)
+    >>>
+    >>> # initialize directory at /foo
+    >>> ds.directory(Key('/foo'))
+    >>>
+    >>> # adding directory entries
+    >>> ds.directoryAdd(Key('/foo'), Key('/foo/bar'))
+    >>> ds.directoryAdd(Key('/foo'), Key('/foo/baz'))
+    >>>
+    >>> # value is a generator returning all the keys in this dir
+    >>> for key in ds.directoryRead(Key('/foo')):
+    ...   print key
+    Key('/foo/bar')
+    Key('/foo/baz')
+    >>>
+    >>> # querying for a collection works
+    >>> for item in ds.query(Query(Key('/foo'))):
+    ...  print item
+    'bar'
+    'baz'
+
+  '''
+
+  def directory(self, dir_key):
+    '''Initializes directory at dir_key.'''
+
+    super(DirectoryDatastore, self).put(dir_key, [])
+
+
+  def directoryRead(self, dir_key):
+    '''Returns a generator that iterates over all keys in the directory
+    referenced by `dir_key`
+
+    Returns None if the directory `dir_key` does not exist
+    '''
+
+    return self.directory_entries_generator(dir_key)
+
+
+  def directoryAdd(self, dir_key, key):
+    '''Adds directory entry `key` to directory at `dir_key`.
+
+    If the directory `dir_key` does not exist, it is created.'''
+
+    dir_items = super(DirectoryDatastore, self).get(dir_key)
+    if dir_items is None:
+      dir_items = []
+
+    dir_items.append(key)
+    super(DirectoryDatastore, self).put(dir_key, dir_items)
+
+
+  def directoryRemove(self, dir_key, key):
+    '''Removes directory entry `key` from directory at `dir_key`.
+
+    If either the directory `dir_key` or the directory entry `key` don't exist,
+    this method is a no-op.
+    '''
+
+    dir_items = super(DirectoryDatastore, self).get(dir_key)
+    if dir_items is not None:
+      try:
+        dir_items.remove(key)
+
+      except ValueError:
+        pass
+
+
+  def directory_entries_generator(self, dir_key):
+    dir_items = super(DirectoryDatastore, self).get(dir_key)
+    if dir_items is not None:
+      for item in dir_items:
+        yield item
+
+
+
 class DirectoryTreeDatastore(ShimDatastore):
   '''Datastore that tracks directory entries, like in a filesystem.
   All key changes cause changes in a collection-like directory.
