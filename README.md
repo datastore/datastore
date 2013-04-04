@@ -47,7 +47,7 @@ From source:
 
 
 * [datastore.aws](https://github.com/datastore/datastore.aws) - aws s3 implementation
-* [datastore.git](https://github.com/datastore/datastore.git) - git implementation
+* [datastore.git](https://github.com/datastore/datastore-git) - git implementation
 * [datastore.mongo](https://github.com/datastore/datastore.mongo) - monogdb implementation
 * [datastore.memcached](https://github.com/datastore/datastore.memcached) - memcached implementation
 * [datastore.pylru](https://github.com/datastore/datastore.pylru) - pylru cache implementation
