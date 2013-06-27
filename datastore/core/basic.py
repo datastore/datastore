@@ -793,8 +793,85 @@ class SymlinkDatastore(ShimDatastore):
 
 
 
-
 class DirectoryDatastore(ShimDatastore):
+  '''Datastore that allows manual tracking of directory entries.
+
+  For example:
+    >>> ds = DirectoryDatastore(ds)
+    >>>
+    >>> # initialize directory at /foo
+    >>> ds.directory(Key('/foo'))
+    >>>
+    >>> # adding directory entries
+    >>> ds.directoryAdd(Key('/foo'), Key('/foo/bar'))
+    >>> ds.directoryAdd(Key('/foo'), Key('/foo/baz'))
+    >>>
+    >>> # value is a generator returning all the keys in this dir
+    >>> for key in ds.directoryRead(Key('/foo')):
+    ...   print key
+    Key('/foo/bar')
+    Key('/foo/baz')
+    >>>
+    >>> # querying for a collection works
+    >>> for item in ds.query(Query(Key('/foo'))):
+    ...  print item
+    'bar'
+    'baz'
+
+  '''
+
+  def directory(self, dir_key):
+    '''Initializes directory at dir_key.'''
+    dir_items = self.get(dir_key)
+    if not isinstance(dir_items, list):
+      self.put(dir_key, [])
+
+
+  def directoryRead(self, dir_key):
+    '''Returns a generator that iterates over all keys in the directory
+    referenced by `dir_key`
+
+    Returns None if the directory `dir_key` does not exist
+    '''
+
+    return self.directory_entries_generator(dir_key)
+
+
+  def directoryAdd(self, dir_key, key):
+    '''Adds directory entry `key` to directory at `dir_key`.
+
+    If the directory `dir_key` does not exist, it is created.
+    '''
+    key = str(key)
+
+    dir_items = self.get(dir_key) or []
+    if key not in dir_items:
+      dir_items.append(key)
+      self.put(dir_key, dir_items)
+
+
+  def directoryRemove(self, dir_key, key):
+    '''Removes directory entry `key` from directory at `dir_key`.
+
+    If either the directory `dir_key` or the directory entry `key` don't exist,
+    this method is a no-op.
+    '''
+    key = str(key)
+
+    dir_items = self.get(dir_key) or []
+    if key in dir_items:
+      dir_items = [k for k in dir_items if k != key]
+      self.put(dir_key, dir_items)
+
+
+  def directory_entries_generator(self, dir_key):
+    dir_items = self.get(dir_key) or []
+    for item in dir_items:
+      yield Key(item)
+
+
+
+class DirectoryTreeDatastore(ShimDatastore):
   '''Datastore that tracks directory entries, like in a filesystem.
   All key changes cause changes in a collection-like directory.
 
@@ -803,7 +880,7 @@ class DirectoryDatastore(ShimDatastore):
       >>> import datastore.core
       >>>
       >>> dds = datastore.DictDatastore()
-      >>> rds = datastore.DirectoryDatastore(dds)
+      >>> rds = datastore.DirectoryTreeDatastore(dds)
       >>>
       >>> a = datastore.Key('/A')
       >>> b = datastore.Key('/A/B')
@@ -832,9 +909,9 @@ class DirectoryDatastore(ShimDatastore):
 
   def put(self, key, value):
     '''Stores the object `value` named by `key`self.
-       DirectoryDatastore stores a directory entry.
+       DirectoryTreeDatastore stores a directory entry.
     '''
-    super(DirectoryDatastore, self).put(key, value)
+    super(DirectoryTreeDatastore, self).put(key, value)
 
     str_key = str(key)
 
@@ -849,14 +926,14 @@ class DirectoryDatastore(ShimDatastore):
     # ensure key is in directory
     if str_key not in directory:
       directory.append(str_key)
-      super(DirectoryDatastore, self).put(dir_key, directory)
+      super(DirectoryTreeDatastore, self).put(dir_key, directory)
 
 
   def delete(self, key):
     '''Removes the object named by `key`.
-       DirectoryDatastore removes the directory entry.
+       DirectoryTreeDatastore removes the directory entry.
     '''
-    super(DirectoryDatastore, self).delete(key)
+    super(DirectoryTreeDatastore, self).delete(key)
 
     str_key = str(key)
 
@@ -872,14 +949,14 @@ class DirectoryDatastore(ShimDatastore):
     if directory and str_key in directory:
       directory.remove(str_key)
       if len(directory) > 0:
-        super(DirectoryDatastore, self).put(dir_key, directory)
+        super(DirectoryTreeDatastore, self).put(dir_key, directory)
       else:
-        super(DirectoryDatastore, self).delete(dir_key)
+        super(DirectoryTreeDatastore, self).delete(dir_key)
 
 
   def query(self, query):
     '''Returns objects matching criteria expressed in `query`.
-    DirectoryDatastore uses directory entries.
+    DirectoryTreeDatastore uses directory entries.
     '''
     return query(self.directory_values_generator(query.key))
 
@@ -897,6 +974,8 @@ class DirectoryDatastore(ShimDatastore):
     directory = self.directory(key)
     for key in directory:
       yield self.get(Key(key))
+
+
 
 
 class DatastoreCollection(ShimDatastore):
