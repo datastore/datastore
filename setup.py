@@ -28,7 +28,7 @@ setup(
   long_description=readme,
   author=metadata['author'],
   author_email=metadata['email'],
-  url='http://github.com/jbenet/datastore',
+  url='http://github.com/datastore/datastore',
   keywords=[
     'datastore',
     'unified api',
