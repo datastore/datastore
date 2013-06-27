@@ -1,5 +1,5 @@
 
-__version__ = '0.3.5'
+__version__ = '0.3.6'
 __author__ = 'Juan Batiz-Benet'
 __email__ = 'juan@benet.ai'
 
@@ -31,6 +31,7 @@ from basic import NamespaceDatastore
 from basic import NestedPathDatastore
 from basic import SymlinkDatastore
 from basic import DirectoryTreeDatastore
+from basic import DirectoryDatastore
 
 from basic import DatastoreCollection
 from basic import ShardedDatastore
