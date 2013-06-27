@@ -822,8 +822,9 @@ class DirectoryDatastore(ShimDatastore):
 
   def directory(self, dir_key):
     '''Initializes directory at dir_key.'''
-
-    super(DirectoryDatastore, self).put(dir_key, [])
+    dir_items = self.get(dir_key)
+    if not isinstance(dir_items, list):
+      self.put(dir_key, [])
 
 
   def directoryRead(self, dir_key):
@@ -839,14 +840,14 @@ class DirectoryDatastore(ShimDatastore):
   def directoryAdd(self, dir_key, key):
     '''Adds directory entry `key` to directory at `dir_key`.
 
-    If the directory `dir_key` does not exist, it is created.'''
+    If the directory `dir_key` does not exist, it is created.
+    '''
+    key = str(key)
 
-    dir_items = super(DirectoryDatastore, self).get(dir_key)
-    if dir_items is None:
-      dir_items = []
-
-    dir_items.append(key)
-    super(DirectoryDatastore, self).put(dir_key, dir_items)
+    dir_items = self.get(dir_key) or []
+    if key not in dir_items:
+      dir_items.append(key)
+      self.put(dir_key, dir_items)
 
 
   def directoryRemove(self, dir_key, key):
@@ -855,21 +856,18 @@ class DirectoryDatastore(ShimDatastore):
     If either the directory `dir_key` or the directory entry `key` don't exist,
     this method is a no-op.
     '''
+    key = str(key)
 
-    dir_items = super(DirectoryDatastore, self).get(dir_key)
-    if dir_items is not None:
-      try:
-        dir_items.remove(key)
-
-      except ValueError:
-        pass
+    dir_items = self.get(dir_key) or []
+    if key in dir_items:
+      dir_items = [k for k in dir_items if k != key]
+      self.put(dir_key, dir_items)
 
 
   def directory_entries_generator(self, dir_key):
-    dir_items = super(DirectoryDatastore, self).get(dir_key)
-    if dir_items is not None:
-      for item in dir_items:
-        yield item
+    dir_items = self.get(dir_key) or []
+    for item in dir_items:
+      yield Key(item)
 
 
 

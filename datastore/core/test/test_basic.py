@@ -783,6 +783,28 @@ class TestDirectoryDatastore(TestDatastore):
     s2 = DirectoryDatastore(DictDatastore())
     self.subtest_simple([s1, s2])
 
+
+  def test_directory_init(self):
+    from ..basic import DirectoryDatastore
+
+    ds = DirectoryDatastore(DictDatastore())
+
+    # initialize directory at /foo
+    dir_key = Key('/foo')
+    ds.directory(dir_key)
+    self.assertEqual(ds.get(dir_key), [])
+
+    # can add to dir
+    bar_key = Key('/foo/bar')
+    ds.directoryAdd(dir_key, bar_key)
+    self.assertEqual(ds.get(dir_key), [str(bar_key)])
+
+    # re-init does not wipe out directory at /foo
+    dir_key = Key('/foo')
+    ds.directory(dir_key)
+    self.assertEqual(ds.get(dir_key), [str(bar_key)])
+
+
   def test_directory_simple(self):
     from ..basic import DirectoryDatastore
 
@@ -793,21 +815,75 @@ class TestDirectoryDatastore(TestDatastore):
     ds.directory(dir_key)
 
     # adding directory entries
-    ds.directoryAdd(dir_key, Key('/foo/bar'))
-    ds.directoryAdd(dir_key, Key('/foo/baz'))
+    bar_key = Key('/foo/bar')
+    baz_key = Key('/foo/baz')
+    ds.directoryAdd(dir_key, bar_key)
+    ds.directoryAdd(dir_key, baz_key)
+    keys = list(ds.directoryRead(dir_key))
+    self.assertEqual(keys, [bar_key, baz_key])
 
-    gen = ds.directoryRead(dir_key)
-    self.assertEqual(gen.next(), Key('/foo/bar'))
-    self.assertEqual(gen.next(), Key('/foo/baz'))
+    # removing directory entries
+    ds.directoryRemove(dir_key, bar_key)
+    keys = list(ds.directoryRead(dir_key))
+    self.assertEqual(keys, [baz_key])
 
-    ds.directoryRemove(dir_key, Key('/foo/bar'))
-    gen = ds.directoryRead(dir_key)
-    self.assertEqual(gen.next(), Key('/foo/baz'))
+    ds.directoryRemove(dir_key, baz_key)
+    keys = list(ds.directoryRead(dir_key))
+    self.assertEqual(keys, [])
 
-    ds.directoryRemove(dir_key, Key('/foo/baz'))
+    # generator
     with self.assertRaises(StopIteration):
       gen = ds.directoryRead(dir_key)
       gen.next()
+
+
+  def test_directory_double_add(self):
+    from ..basic import DirectoryDatastore
+
+    ds = DirectoryDatastore(DictDatastore())
+
+    # initialize directory at /foo
+    dir_key = Key('/foo')
+    ds.directory(dir_key)
+
+    # adding directory entries
+    bar_key = Key('/foo/bar')
+    baz_key = Key('/foo/baz')
+    ds.directoryAdd(dir_key, bar_key)
+    ds.directoryAdd(dir_key, baz_key)
+    ds.directoryAdd(dir_key, bar_key)
+    ds.directoryAdd(dir_key, baz_key)
+    ds.directoryAdd(dir_key, baz_key)
+    ds.directoryAdd(dir_key, bar_key)
+
+    keys = list(ds.directoryRead(dir_key))
+    self.assertEqual(keys, [bar_key, baz_key])
+
+
+  def test_directory_remove(self):
+    from ..basic import DirectoryDatastore
+
+    ds = DirectoryDatastore(DictDatastore())
+
+    # initialize directory at /foo
+    dir_key = Key('/foo')
+    ds.directory(dir_key)
+
+    # adding directory entries
+    bar_key = Key('/foo/bar')
+    baz_key = Key('/foo/baz')
+    ds.directoryAdd(dir_key, bar_key)
+    ds.directoryAdd(dir_key, baz_key)
+    keys = list(ds.directoryRead(dir_key))
+    self.assertEqual(keys, [bar_key, baz_key])
+
+    # removing directory entries
+    ds.directoryRemove(dir_key, bar_key)
+    ds.directoryRemove(dir_key, bar_key)
+    ds.directoryRemove(dir_key, bar_key)
+    keys = list(ds.directoryRead(dir_key))
+    self.assertEqual(keys, [baz_key])
+
 
 
 
