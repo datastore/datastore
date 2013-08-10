@@ -8,107 +8,132 @@ from ..query import Query
 
 
 class TestDatastore(unittest.TestCase):
+  pkey = Key('/dfadasfdsafdas/')
+  stores = []
+  numelems = []
 
-  def subtest_simple(self, stores, numelems=1000):
+  def check_length(self,len):
+    try:
+      for sn in self.stores:
+        self.assertEqual(len(sn), len)
+    except TypeError, e:
+      pass
 
-    def checkLength(len):
-      try:
-        for sn in stores:
-          self.assertEqual(len(sn), numelems)
-      except TypeError, e:
-        pass
-
-    self.assertTrue(len(stores) > 0)
-
-    pkey = Key('/dfadasfdsafdas/')
-
-    checkLength(0)
+  def subtest_remove_nonexistent(self):
+    self.assertTrue(len(self.stores) > 0)
+    self.check_length(0)
 
     # ensure removing non-existent keys is ok.
-    for value in range(0, numelems):
-      key = pkey.child(value)
-      for sn in stores:
+    for value in range(0, self.numelems):
+      key = self.pkey.child(value)
+      for sn in self.stores:
         self.assertFalse(sn.contains(key))
         sn.delete(key)
         self.assertFalse(sn.contains(key))
 
-    checkLength(0)
+    self.check_length(0)
 
+  def subtest_insert_elems(self):
     # insert numelems elems
-    for value in range(0, numelems):
-      key = pkey.child(value)
-      for sn in stores:
+    for value in range(0, self.numelems):
+      key = self.pkey.child(value)
+      for sn in self.stores:
         self.assertFalse(sn.contains(key))
         sn.put(key, value)
         self.assertTrue(sn.contains(key))
         self.assertEqual(sn.get(key), value)
 
     # reassure they're all there.
-    checkLength(numelems)
+    self.check_length(self.numelems)
 
-    for value in range(0, numelems):
-      key = pkey.child(value)
-      for sn in stores:
+    for value in range(0, self.numelems):
+      key = self.pkey.child(value)
+      for sn in self.stores:
         self.assertTrue(sn.contains(key))
         self.assertEqual(sn.get(key), value)
 
-    checkLength(numelems)
+    self.check_length(self.numelems)
 
-    k = pkey
-    n = int(numelems)
-    allitems = list(range(0, n))
+  def check_query(self, query, total, slice):
+    allitems = list(range(0, total))
 
-    def test_query(query, slice):
-      for sn in stores:
-        try:
-          contents = list(sn.query(Query(pkey)))
-          expected = contents[slice]
-          result = list(sn.query(query))
+    for sn in self.stores:
+      try:
+        contents = list(sn.query(Query(self.pkey)))
+        expected = contents[slice]
+        resultset = sn.query(query)
+        result = list(resultset)
 
-          # make sure everything is there.
-          self.assertTrue(len(contents) == len(allitems),\
-            '%s == %s' %  (str(contents), str(allitems)))
-          self.assertTrue(all([val in contents for val in allitems]))
+        # make sure everything is there.
+        self.assertTrue(len(contents) == len(allitems),\
+          '%s == %s' %  (str(contents), str(allitems)))
+        self.assertTrue(all([val in contents for val in allitems]))
 
-          self.assertTrue(len(result) == len(expected),\
-            '%s == %s' %  (str(result), str(expected)))
-          self.assertTrue(all([val in result for val in expected]))
-          #TODO: should order be preserved?
-          # self.assertEqual(result, expected)
+        self.assertTrue(len(result) == len(expected),\
+          '%s == %s' %  (str(result), str(expected)))
+        self.assertTrue(all([val in result for val in expected]))
+        
+        #TODO: should order be preserved?
+        #self.assertEqual(result, expected)
 
-        except NotImplementedError:
-          print 'WARNING: %s does not implement query.' % sn
+      except NotImplementedError:
+        print 'WARNING: %s does not implement query.' % sn
 
-    test_query(Query(k), slice(0, n))
-    test_query(Query(k, limit=n), slice(0, n))
-    test_query(Query(k, limit=n/2), slice(0, n/2))
-    test_query(Query(k, offset=n/2), slice(n/2, n))
-    test_query(Query(k, offset=n/3, limit=n/3), slice(n/3, 2*(n/3)))
+    return resultset
+
+  def subtest_queries(self):
+    for value in range(0, self.numelems):
+      key = self.pkey.child(value)
+      for sn in self.stores:
+        sn.put(key, value)
+
+    k = self.pkey
+    n = int(self.numelems)
+    
+    self.check_query(Query(k), n, slice(0, n))
+    self.check_query(Query(k, limit=n), n, slice(0, n))
+    self.check_query(Query(k, limit=n/2), n, slice(0, n/2))
+    self.check_query(Query(k, offset=n/2), n, slice(n/2, n))
+    self.check_query(Query(k, offset=n/3, limit=n/3), n, slice(n/3, 2*(n/3)))
     del k
     del n
 
+
+  def subtest_update(self):
     # change numelems elems
-    for value in range(0, numelems):
-      key = pkey.child(value)
-      for sn in stores:
+    for value in range(0, self.numelems):
+      key = self.pkey.child(value)
+      for sn in self.stores:
         self.assertTrue(sn.contains(key))
         sn.put(key, value + 1)
         self.assertTrue(sn.contains(key))
         self.assertNotEqual(value, sn.get(key))
         self.assertEqual(value + 1, sn.get(key))
 
-    checkLength(numelems)
+    self.check_length(self.numelems)
 
+  def subtest_remove(self):  
     # remove numelems elems
-    for value in range(0, numelems):
-      key = pkey.child(value)
-      for sn in stores:
+    for value in range(0, self.numelems):
+      key = self.pkey.child(value)
+      for sn in self.stores:
         self.assertTrue(sn.contains(key))
         sn.delete(key)
         self.assertFalse(sn.contains(key))
 
-    checkLength(0)
+    self.check_length(0)
 
+
+  def subtest_simple(self, stores, numelems=1000):
+    self.stores = stores
+    self.numelems = numelems
+
+    self.subtest_remove_nonexistent()
+    self.subtest_insert_elems()
+    self.subtest_queries()
+    self.subtest_update()
+    self.subtest_remove()
+    
 
 class TestNullDatastore(unittest.TestCase):
 
