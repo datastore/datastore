@@ -296,7 +296,7 @@ class Query(object):
   '''Object attribute getter. Can be overridden to match client data model.'''
   object_getattr = staticmethod(_object_getattr)
 
-  def __init__(self, key=Key('/'), limit=None, offset=0, object_getattr=None):
+  def __init__(self, key=Key('/'), limit=None, offset=0, offset_key=None, object_getattr=None):
     ''' Initialize a query.
 
     Parameters
@@ -326,6 +326,7 @@ class Query(object):
 
     self.limit = int(limit) if limit is not None else None
     self.offset = int(offset)
+    self.offset_key = offset_key
 
     self.filters = []
     self.orders = []
@@ -416,6 +417,7 @@ class Query(object):
       other = Query(self.key, object_getattr=self.object_getattr)
     other.limit = self.limit
     other.offset = self.offset
+    other.offset_key = self.offset_key
     other.filters = self.filters
     other.orders = self.orders
     return other
@@ -429,6 +431,8 @@ class Query(object):
       d['limit'] = self.limit
     if self.offset > 0:
       d['offset'] = self.offset
+    if self.offset_key:
+      d['offset_key'] = str(self.offset_key)
     if len(self.filters) > 0:
       d['filter'] = [[f.field, f.op, f.value] for f in self.filters]
     if len(self.orders) > 0:
@@ -453,7 +457,7 @@ class Query(object):
             filter = Filter(*filter)
           query.filter(filter)
 
-      elif key in ['limit', 'offset']:
+      elif key in ['limit', 'offset', 'offset_key']:
         setattr(query, key, value)
     return query
 
