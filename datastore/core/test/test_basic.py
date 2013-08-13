@@ -56,6 +56,7 @@ class TestDatastore(unittest.TestCase):
 
   def check_query(self, query, total, slice):
     allitems = list(range(0, total))
+    resultset = None
 
     for sn in self.stores:
       try:
