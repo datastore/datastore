@@ -52,6 +52,7 @@ From source:
 * [datastore.memcached](https://github.com/datastore/datastore.memcached) - memcached implementation
 * [datastore.pylru](https://github.com/datastore/datastore.pylru) - pylru cache implementation
 * [datastore.redis](https://github.com/datastore/datastore.redis) - redis implementation
+* [datastore.leveldb](https://github.com/datastore/datastore.leveldb) - leveldb implementation
 
 
 ### Documentation
