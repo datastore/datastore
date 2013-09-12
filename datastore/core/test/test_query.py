@@ -218,6 +218,11 @@ class TestFilter(unittest.TestCase):
     self.assertFilter(feqt2, vs, [v2])
     self.assertFilter(feqt3, vs, [v3])
 
+  def test_none(self):
+    # test query against None
+    feqnone = Filter('val', '=', None)
+    vs = [{'val': None}, {'val': 'something'}]
+    self.assertFilter(feqnone, vs, vs[0:1])
 
   def test_object(self):
     t1 = nanotime.now()
