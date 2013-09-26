@@ -1,5 +1,12 @@
 # datastore
 
+[![status](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/status.png)](https://sourcegraph.com/github.com/datastore/datastore)
+[![xrefs](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/xrefs.png)](https://sourcegraph.com/github.com/datastore/datastore)
+[![funcs](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/funcs.png)](https://sourcegraph.com/github.com/datastore/datastore)
+[![top func](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/top-func.png)](https://sourcegraph.com/github.com/datastore/datastore)
+[![Views in the last 24 hours](https://sourcegraph.com/api/repos/github.com/datastore/datastore/counters/views-24h.png)](https://sourcegraph.com/github.com/datastore/datastore)
+
+
 ## simple, unified API for multiple data stores
 
 datastore is a generic layer of abstraction for data store and database access.
