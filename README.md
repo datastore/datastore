@@ -1,5 +1,6 @@
 # datastore
 
+[![Build Status](https://travis-ci.org/datastore/datastore.png?branch=master)](https://travis-ci.org/datastore/datastore)
 [![status](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/status.png)](https://sourcegraph.com/github.com/datastore/datastore)
 [![xrefs](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/xrefs.png)](https://sourcegraph.com/github.com/datastore/datastore)
 [![funcs](https://sourcegraph.com/api/repos/github.com/datastore/datastore/badges/funcs.png)](https://sourcegraph.com/github.com/datastore/datastore)
