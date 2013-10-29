@@ -296,7 +296,7 @@ class Query(object):
   '''Object attribute getter. Can be overridden to match client data model.'''
   object_getattr = staticmethod(_object_getattr)
 
-  def __init__(self, key, limit=None, offset=0, object_getattr=None):
+  def __init__(self, key=Key('/'), limit=None, offset=0, object_getattr=None):
     ''' Initialize a query.
 
     Parameters
