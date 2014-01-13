@@ -224,6 +224,10 @@ class TestFilter(unittest.TestCase):
     vs = [{'val': None}, {'val': 'something'}]
     self.assertFilter(feqnone, vs, vs[0:1])
 
+    feqzero = Filter('val', '=', 0)
+    vs = [{'val': 0}, {'val': None}]
+    self.assertFilter(feqzero, vs, vs[0:1])
+
   def test_object(self):
     t1 = nanotime.now()
     t2 = nanotime.now()

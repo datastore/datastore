@@ -146,7 +146,7 @@ class Filter(object):
 
     # TODO: which way should the direction go here? it may make more sense to
     #       convert the passed-in value instead. Or try both? Or not at all?
-    if not isinstance(value, self.value.__class__) and not self.value is None:
+    if not isinstance(value, self.value.__class__) and not self.value is None and not value is None:
       value = self.value.__class__(value)
 
     return self.valuePasses(value)
