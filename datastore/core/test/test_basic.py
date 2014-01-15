@@ -1,6 +1,9 @@
 
 import unittest
 import logging
+import threading
+import time
+import random
 
 from ..basic import DictDatastore
 from ..key import Key
@@ -189,6 +192,116 @@ class TestCacheShimDatastore(TestDatastore):
     s3 = CacheShimDatastore(DictDatastore(), cache=DictDatastore())
 
     self.subtest_simple([s1, s2, s3])
+
+
+class TestLockShimDatastore(TestDatastore):
+    class LockDatastoreClient(threading.Thread):
+        def __init__(self, store, key, locking=True, repeats=100):
+            self.store = store
+            self.key = key
+            self.repeats = repeats
+            self.locking = locking
+            super(TestLockShimDatastore.LockDatastoreClient, self).__init__()
+
+        def run(self):
+            class fake_guard():
+                def __enter__(self):
+                    pass
+
+                def __exit__(self, type, value, traceback):
+                    pass
+
+            for i in range(0, self.repeats):
+                guard = self.store.synchronized(self.key, timeout=2) if self.locking else fake_guard()
+                with guard:
+
+                    val = self.store.get(self.key)
+                    # random delay between 0 and 0.00001 seconds (keep it small so we can run this lots of times)
+                    wait = random.randint(0, 1000) / 100000000.0
+                    time.sleep(wait)
+                    self.store.put(self.key, val+1)
+
+    def setup_stores(self):
+        from ..basic import LockShimDatastore
+
+        # shared underlying root datastore
+        sr = DictDatastore()
+
+        # shared lock datastore
+        sl = DictDatastore()
+
+        # two concurrent datastores
+        s1 = LockShimDatastore(sr, lock=sl)
+        s2 = LockShimDatastore(sr, lock=sl)
+
+        return [s1, s2]
+
+    def test_simple(self):        
+        self.subtest_simple(self.setup_stores()[:1])
+
+    def test_simple_lock(self):
+        s1, s2 = self.setup_stores()
+
+        # 1 = 1 to start
+        k1 = Key('1')
+        s1.put(k1, 1)
+
+        # store 1 locks, store 2 tries write
+        s1.lock(k1)
+        v1 = s1.get(k1)
+        v2 = s2.get(k1)
+        try:
+            s2.put(k1, v2+1)
+            self.assertTrue(False, 'Should have encountered locking exception')
+        except:
+            pass
+
+        s1.put(k1, v1+1)
+        s1.unlock(k1)
+
+        v2 = s2.get(k1)
+        s2.put(k1, v2+1)
+        self.assertEquals(s1.get(k1), 3)
+
+    def test_acquire_lock_timeout(self):
+        s1, s2 = self.setup_stores()
+        k1 = Key('1')
+
+        s1.lock(k1)
+        try:
+            s2.wait_for_lock(k1, .1)
+            self.assertTrue(False, 'Should have not been able to acquire lock')
+        except:
+            pass
+
+    def test_concurrent_writes(self):
+        s1, s2 = self.setup_stores()
+        key = Key('test')
+        random.seed()            
+        
+        def run_concurrent_increments(repeats, locking):
+            t1 = self.LockDatastoreClient(s1, key, locking=locking, repeats=repeats)
+            t2 = self.LockDatastoreClient(s2, key, locking=locking, repeats=repeats)
+
+            t1.start()
+            t2.start()
+
+            t1.join()
+            t2.join()
+
+        # number of increments per client
+        rpts = 5000
+            
+        # non-locking
+        s1.put(key, 0)
+        run_concurrent_increments(rpts, False)
+        self.assertNotEqual(s1.get(key), rpts*2)
+
+        # locking
+        s1.put(key, 0)
+        run_concurrent_increments(rpts, True)
+        self.assertEqual(s1.get(key), rpts*2)
+
 
 
 class TestLoggingDatastore(TestDatastore):

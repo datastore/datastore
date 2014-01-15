@@ -1,6 +1,7 @@
 
 from key import Key
 from query import Cursor
+import uuid, time
 
 class Datastore(object):
   '''A Datastore represents storage for any key-value pair.
@@ -976,7 +977,97 @@ class DirectoryTreeDatastore(ShimDatastore):
       yield self.get(Key(key))
 
 
+class LockShimDatastore(ShimDatastore):
+  '''Wraps a datastore with a locking mechanism.'''
 
+  class Guard(object):
+      '''To be used in a with statement to synchronize 
+         writes to a particular key in the store.
+      '''
+      def __init__(self, store, key, timeout):
+        self.store = store
+        self.key = key
+        self.timeout = timeout
+
+      def __enter__(self):
+        self.store.wait_for_lock(self.key, timeout=self.timeout)
+        return self.store
+
+      def __exit__(self, type, value, traceback):
+        self.store.unlock(self.key)
+
+
+  def __init__(self, *args, **kwargs):
+    self.uuid = str(uuid.uuid4())
+    self.lock_datastore = kwargs.pop('lock')
+
+    # used to make sure another process isn't locking at the same time
+    # a good value would be the duration of a round-trip to the lock store.
+    self.lock_delay = kwargs.pop('delay', 0.0001)
+
+    if not isinstance(self.lock_datastore, Datastore):
+      errstr = 'lock must be of type %s. Got %s.'
+      raise TypeError(errstr % (Datastore, self.cache_datastore))
+
+    super(LockShimDatastore, self).__init__(*args, **kwargs)
+
+  def is_locked_elsewhere(self, key):
+    '''Returns whether a lock on the key is held by another store'''
+    return self.lock_datastore.get(key) not in [None, self.uuid]
+
+  def lock(self, key):
+    '''Locks the key when not already locked by another
+       store. Returns whether lock was successfull.
+    '''
+    if not self.is_locked_elsewhere(key):
+      self.lock_datastore.put(key, self.uuid)
+
+      # just in case the lock is being acquired elsewhere at the same time
+      time.sleep(self.lock_delay)
+
+      lock_id = self.lock_datastore.get(key)
+      if lock_id == self.uuid:
+        return True
+
+    return False
+
+  def unlock(self, key):
+    '''Unlocks the key, even when lock is held by another store'''
+    self.lock_datastore.delete(key)
+
+  def wait_for_lock(self, key, timeout=1):
+    '''Tries to acquire a lock for a key until given timeout.
+       Throws exception when lock could not be acquired.
+    '''
+    start = time.time()
+    while not self.lock(key):
+      if time.time() > start + timeout:
+        raise Exception('Could not acquire lock for %s within time' % key)
+      time.sleep(self.lock_delay)
+
+  def synchronized(self, key, timeout=1):
+    '''Returns a guard to be used in a "with" statement 
+       that locks/unlocks the key.
+    '''
+    return self.Guard(self, key, timeout)
+
+  def put(self, key, value):
+    '''Stores the object `value` named by `key`self.
+       Makes sure the write is not locked by another store.
+    '''
+    #if self.is_locked_elsewhere(key):
+    #  raise Exception('Key %s is locked' % (key))
+
+    self.child_datastore.put(key, value)
+
+  def delete(self, key):
+    '''Removes the object named by `key`.
+       Makes sure the write is not locked by another store.
+    '''
+    if self.is_locked_elsewhere(key):
+      raise Exception('Key %s is locked' % (key))
+
+    self.child_datastore.delete(key)
 
 class DatastoreCollection(ShimDatastore):
   '''Represents a collection of datastores.'''
