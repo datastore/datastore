@@ -1,6 +1,6 @@
 
 from key import Key
-from query import Cursor
+from query import Cursor, Query
 import uuid, time
 
 class Datastore(object):
@@ -1000,42 +1000,63 @@ class LockShimDatastore(ShimDatastore):
   def __init__(self, *args, **kwargs):
     self.uuid = str(uuid.uuid4())
     self.lock_datastore = kwargs.pop('lock')
-
-    # used to make sure another process isn't locking at the same time
-    # a good value would be the duration of a round-trip to the lock store.
-    self.lock_delay = kwargs.pop('delay', 0.0001)
-
+    
     if not isinstance(self.lock_datastore, Datastore):
       errstr = 'lock must be of type %s. Got %s.'
       raise TypeError(errstr % (Datastore, self.cache_datastore))
 
     super(LockShimDatastore, self).__init__(*args, **kwargs)
 
+  def _lock_key(self, key):
+    return Key('/Lock').instance(str(key).replace('/','*'))
+
+  def _queue_key(self, token=None):
+    return Key('/LockQueue').instance(token or str(uuid.uuid4()))
+
+  def _queue_for_lock(self, key):
+    queue_key = self._queue_key()
+    self.lock_datastore.put(queue_key, {
+      'lock': str(key),
+      'proc': self.uuid,
+      'token': queue_key.name
+    })
+
+  def _first_in_queue_for_lock(self, key):
+    q = Query(Key('/LockQueue')).filter('lock','=',str(key))
+    locks = sorted(self.lock_datastore.query(q), key=lambda l: l['token'])
+    return locks[0]['proc'] if locks else None
+
+  def _unqueue_for_lock(self, key):
+    q = Query(Key('/LockQueue')).filter('lock','=',str(key)).filter('proc','=',self.uuid)
+    my_lock = next(self.lock_datastore.query(q), None)
+    if my_lock:
+      self.lock_datastore.delete(self._queue_key(my_lock['token']))
+
   def is_locked_elsewhere(self, key):
     '''Returns whether a lock on the key is held by another store'''
-    return self.lock_datastore.get(key) not in [None, self.uuid]
+    return self.lock_datastore.get(self._lock_key(key)) not in [None, self.uuid]
 
   def lock(self, key):
     '''Locks the key when not already locked by another
        store. Returns whether lock was successfull.
     '''
     if not self.is_locked_elsewhere(key):
-      self.lock_datastore.put(key, self.uuid)
+      self._queue_for_lock(key)
 
-      # just in case the lock is being acquired elsewhere at the same time
-      time.sleep(self.lock_delay)
-
-      lock_id = self.lock_datastore.get(key)
-      if lock_id == self.uuid:
+      if self._first_in_queue_for_lock(key) == self.uuid:
+        self.lock_datastore.put(self._lock_key(key), self.uuid)
         return True
+      else:
+        self._unqueue_for_lock(key)
 
     return False
 
   def unlock(self, key):
     '''Unlocks the key, even when lock is held by another store'''
-    self.lock_datastore.delete(key)
+    self.lock_datastore.delete(self._lock_key(key))
+    self._unqueue_for_lock(key)    
 
-  def wait_for_lock(self, key, timeout=1):
+  def wait_for_lock(self, key, timeout=1, delay=0.001):
     '''Tries to acquire a lock for a key until given timeout.
        Throws exception when lock could not be acquired.
     '''
@@ -1043,7 +1064,7 @@ class LockShimDatastore(ShimDatastore):
     while not self.lock(key):
       if time.time() > start + timeout:
         raise Exception('Could not acquire lock for %s within time' % key)
-      time.sleep(self.lock_delay)
+      time.sleep(delay)
 
   def synchronized(self, key, timeout=1):
     '''Returns a guard to be used in a "with" statement 
@@ -1055,8 +1076,8 @@ class LockShimDatastore(ShimDatastore):
     '''Stores the object `value` named by `key`self.
        Makes sure the write is not locked by another store.
     '''
-    #if self.is_locked_elsewhere(key):
-    #  raise Exception('Key %s is locked' % (key))
+    if self.is_locked_elsewhere(key):
+      raise Exception('Key %s is locked' % (key))
 
     self.child_datastore.put(key, value)
 
