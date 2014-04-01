@@ -243,8 +243,7 @@ MOCK_MODULES = [
   'pylibmc',
   'redis',
   'pylru',
-  'dulwich',
-  'smhasher'
+  'dulwich'
 ]
 
 for mod_name in MOCK_MODULES:

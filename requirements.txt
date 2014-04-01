@@ -1,5 +1,4 @@
 distribute==0.6.27
-smhasher==0.136.2
 nose==1.2.1
 bson==0.3.3
 nanotime==0.5.2
