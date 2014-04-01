@@ -73,7 +73,7 @@ class TestDatastore(unittest.TestCase):
         self.assertTrue(len(result) == len(expected),\
           '%s == %s' %  (str(result), str(expected)))
         self.assertTrue(all([val in result for val in expected]))
-        
+
         #TODO: should order be preserved?
         #self.assertEqual(result, expected)
 
@@ -90,7 +90,7 @@ class TestDatastore(unittest.TestCase):
 
     k = self.pkey
     n = int(self.numelems)
-    
+
     self.check_query(Query(k), n, slice(0, n))
     self.check_query(Query(k, limit=n), n, slice(0, n))
     self.check_query(Query(k, limit=n/2), n, slice(0, n/2))
@@ -113,7 +113,7 @@ class TestDatastore(unittest.TestCase):
 
     self.check_length(self.numelems)
 
-  def subtest_remove(self):  
+  def subtest_remove(self):
     # remove numelems elems
     for value in range(0, self.numelems):
       key = self.pkey.child(value)
@@ -134,7 +134,7 @@ class TestDatastore(unittest.TestCase):
     self.subtest_queries()
     self.subtest_update()
     self.subtest_remove()
-    
+
 
 class TestNullDatastore(unittest.TestCase):
 
@@ -644,7 +644,7 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertEqual(dds.get(b), lva)
 
     self.assertEqual(sds_query(), [1, 1])
-    self.assertEqual(dds_query(), [1, lva])
+    self.assertEqual(dds_query(), [lva, 1])
 
     # changing link should affect source
     sds.put(b, 2)
@@ -656,7 +656,7 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertEqual(dds.get(b), lva)
 
     self.assertEqual(sds_query(), [2, 2])
-    self.assertEqual(dds_query(), [2, lva])
+    self.assertEqual(dds_query(), [lva, 2])
 
     # deleting source should affect link
     sds.delete(a)
@@ -680,7 +680,7 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertEqual(dds.get(b), lva)
 
     self.assertEqual(sds_query(), [3, 3])
-    self.assertEqual(dds_query(), [3, lva])
+    self.assertEqual(dds_query(), [lva, 3])
 
 
     # deleting link should not affect source
@@ -705,7 +705,7 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertEqual(dds.get(b), lva)
 
     self.assertEqual(sds_query(), [3, 3])
-    self.assertEqual(dds_query(), [3, lva])
+    self.assertEqual(dds_query(), [lva, 3])
 
     # Adding another link should not affect things.
     sds.link(a, c)
@@ -720,7 +720,7 @@ class TestSymlinkDatastore(TestDatastore):
     self.assertEqual(dds.get(c), lva)
 
     self.assertEqual(sds_query(), [3, 3, 3])
-    self.assertEqual(dds_query(), [3, lva, lva])
+    self.assertEqual(dds_query(), [lva, lva, 3])
 
     # linking should be transitive
     sds.link(b, c)
