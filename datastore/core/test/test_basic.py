@@ -93,9 +93,9 @@ class TestDatastore(unittest.TestCase):
 
     self.check_query(Query(k), n, slice(0, n))
     self.check_query(Query(k, limit=n), n, slice(0, n))
-    self.check_query(Query(k, limit=n/2), n, slice(0, n/2))
-    self.check_query(Query(k, offset=n/2), n, slice(n/2, n))
-    self.check_query(Query(k, offset=n/3, limit=n/3), n, slice(n/3, 2*(n/3)))
+    self.check_query(Query(k, limit=n/2), n, slice(0, n//2))
+    self.check_query(Query(k, offset=n/2), n, slice(n//2, n))
+    self.check_query(Query(k, offset=n/3, limit=n/3), n, slice(n//3, 2*(n//3)))
     del k
     del n
 
@@ -999,7 +999,7 @@ class TestDatastoreCollection(TestDatastore):
     s4 = DictDatastore()
     s5 = DictDatastore()
     stores = [s1, s2, s3, s4, s5]
-    hash = lambda key: int(key.name) * len(stores) / numelems
+    hash = lambda key: int(key.name) * len(stores) // numelems
     sharded = ShardedDatastore(stores, shardingfn=hash)
     sumlens = lambda stores: sum([len(s) for s in stores])
 

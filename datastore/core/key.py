@@ -184,7 +184,7 @@ class Key(object):
     For our purposes, then, we are using a perhaps more expensive hash function
     that guarantees equal hash values given the same input.
     '''
-    return fasthash.hash(self)
+    return fasthash.fhash(self)
 
 
   def __iter__(self):

@@ -52,13 +52,13 @@ datastore.__author__ = __author__
 datastore.__email__ = __email__
 
 for k, v in list(locals().items()):
-  if k in ['datastore']:
-    continue
+    if k in ['datastore']:
+        continue
 
-  if k.startswith('__'):
-    continue
+    if k.startswith('__'):
+        continue
 
-  if hasattr(datastore, k):
-    continue
+    if hasattr(datastore, k):
+        continue
 
-  setattr(datastore, k, v)
+    setattr(datastore, k, v)

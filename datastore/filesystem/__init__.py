@@ -14,219 +14,219 @@ import datastore.core
 
 
 def ensure_directory_exists(directory):
-  '''Ensures `directory` exists. May make `directory` and intermediate dirs.
-  Raises RuntimeError if `directory` is a file.
-  '''
-  if not os.path.exists(directory):
-    os.makedirs(directory)
-  elif os.path.isfile(directory):
-    raise RuntimeError('Path %s is a file, not a directory.' % directory)
+    '''Ensures `directory` exists. May make `directory` and intermediate dirs.
+    Raises RuntimeError if `directory` is a file.
+    '''
+    if not os.path.exists(directory):
+        os.makedirs(directory)
+    elif os.path.isfile(directory):
+        raise RuntimeError('Path %s is a file, not a directory.' % directory)
 
 
 
 class FileSystemDatastore(datastore.Datastore):
-  '''Simple flat-file datastore.
+    '''Simple flat-file datastore.
 
-  FileSystemDatastore will store objects in independent files in the host's
-  filesystem. The FileSystemDatastore is initialized with a `root` path, under
-  which to store all objects. Each object will be stored under its own file:
-  `root`/`key`.obj
+    FileSystemDatastore will store objects in independent files in the host's
+    filesystem. The FileSystemDatastore is initialized with a `root` path, under
+    which to store all objects. Each object will be stored under its own file:
+    `root`/`key`.obj
 
-  The `key` portion also replaces namespace parameter delimiters (:) with
-  slashes, creating several nested directories. For example, storing objects
-  under `root` path '/data' with the following keys::
+    The `key` portion also replaces namespace parameter delimiters (:) with
+    slashes, creating several nested directories. For example, storing objects
+    under `root` path '/data' with the following keys::
 
-    Key('/Comedy:MontyPython/Actor:JohnCleese')
-    Key('/Comedy:MontyPython/Sketch:ArgumentClinic')
-    Key('/Comedy:MontyPython/Sketch:CheeseShop')
-    Key('/Comedy:MontyPython/Sketch:CheeseShop/Character:Mousebender')
+      Key('/Comedy:MontyPython/Actor:JohnCleese')
+      Key('/Comedy:MontyPython/Sketch:ArgumentClinic')
+      Key('/Comedy:MontyPython/Sketch:CheeseShop')
+      Key('/Comedy:MontyPython/Sketch:CheeseShop/Character:Mousebender')
 
-  will yield the file structure::
+    will yield the file structure::
 
-    /data/Comedy/MontyPython/Actor/JohnCleese.obj
-    /data/Comedy/MontyPython/Sketch/ArgumentClinic.obj
-    /data/Comedy/MontyPython/Sketch/CheeseShop.obj
-    /data/Comedy/MontyPython/Sketch/CheeseShop/Character/Mousebender.obj
-
-  Implementation Notes:
-
-    Separating key namespaces (and their parameters) within directories allows
-    granular querying for under a specific key. For example, a query with key::
-
-      Key('/data/Comedy:MontyPython/Sketch:CheeseShop')
-
-    will query for all objects under `Sketch:CheeseShop` independently of
-    queries for::
-
-      Key('/data/Comedy:MontyPython/Sketch')
-
-    Also, using the `.obj` extension gets around the ambiguity of having both a
-    `CheeseShop` object and directory::
-
+      /data/Comedy/MontyPython/Actor/JohnCleese.obj
+      /data/Comedy/MontyPython/Sketch/ArgumentClinic.obj
       /data/Comedy/MontyPython/Sketch/CheeseShop.obj
-      /data/Comedy/MontyPython/Sketch/CheeseShop/
+      /data/Comedy/MontyPython/Sketch/CheeseShop/Character/Mousebender.obj
+
+    Implementation Notes:
+
+      Separating key namespaces (and their parameters) within directories allows
+      granular querying for under a specific key. For example, a query with key::
+
+        Key('/data/Comedy:MontyPython/Sketch:CheeseShop')
+
+      will query for all objects under `Sketch:CheeseShop` independently of
+      queries for::
+
+        Key('/data/Comedy:MontyPython/Sketch')
+
+      Also, using the `.obj` extension gets around the ambiguity of having both a
+      `CheeseShop` object and directory::
+
+        /data/Comedy/MontyPython/Sketch/CheeseShop.obj
+        /data/Comedy/MontyPython/Sketch/CheeseShop/
 
 
-  Hello World:
+    Hello World:
 
-      >>> import datastore.filesystem
-      >>>
-      >>> ds = datastore.filesystem.FileSystemDatastore('/tmp/.test_datastore')
-      >>>
-      >>> hello = datastore.Key('hello')
-      >>> ds.put(hello, 'world')
-      >>> ds.contains(hello)
-      True
-      >>> ds.get(hello)
-      'world'
-      >>> ds.delete(hello)
-      >>> ds.get(hello)
-      None
+        >>> import datastore.filesystem
+        >>>
+        >>> ds = datastore.filesystem.FileSystemDatastore('/tmp/.test_datastore')
+        >>>
+        >>> hello = datastore.Key('hello')
+        >>> ds.put(hello, 'world')
+        >>> ds.contains(hello)
+        True
+        >>> ds.get(hello)
+        'world'
+        >>> ds.delete(hello)
+        >>> ds.get(hello)
+        None
 
-  '''
-
-  object_extension = '.obj'
-  ignore_list = list()
-
-  def __init__(self, root, case_sensitive=True):
-    '''Initialize the datastore with given root directory `root`.
-
-    Args:
-      root: A path at which to mount this filesystem datastore.
     '''
-    root = os.path.normpath(root)
 
-    if not root:
-      errstr = 'root path must not be empty (\'.\' for current directory)'
-      raise ValueError(errstr)
+    object_extension = '.obj'
+    ignore_list = list()
 
-    ensure_directory_exists(root)
+    def __init__(self, root, case_sensitive=True):
+        '''Initialize the datastore with given root directory `root`.
 
-    self.root_path = root
-    self.case_sensitive = bool(case_sensitive)
+        Args:
+          root: A path at which to mount this filesystem datastore.
+        '''
+        root = os.path.normpath(root)
 
+        if not root:
+            errstr = 'root path must not be empty (\'.\' for current directory)'
+            raise ValueError(errstr)
 
-  # object pathing
+        ensure_directory_exists(root)
 
-  def relative_path(self, key):
-    '''Returns the relative path for given `key`'''
-    key = str(key)                # stringify
-    key = key.replace(':', '/')   # turn namespace delimiters into slashes
-    key = key[1:]                 # remove first slash (absolute)
-    if not self.case_sensitive:
-      key = key.lower()           # coerce to lowercase
-    return os.path.normpath(key)
-
-  def path(self, key):
-    '''Returns the `path` for given `key`'''
-    return os.path.join(self.root_path, self.relative_path(key))
-
-  def relative_object_path(self, key):
-    '''Returns the relative path for object pointed by `key`.'''
-    return self.relative_path(key) + self.object_extension
-
-  def object_path(self, key):
-    '''return the object path for `key`.'''
-    return os.path.join(self.root_path, self.relative_object_path(key))
+        self.root_path = root
+        self.case_sensitive = bool(case_sensitive)
 
 
-  # object IO
+    # object pathing
 
-  def _write_object(self, path, value):
-    '''write out `object` to file at `path`'''
-    ensure_directory_exists(os.path.dirname(path))
+    def relative_path(self, key):
+        '''Returns the relative path for given `key`'''
+        key = str(key)                # stringify
+        key = key.replace(':', '/')   # turn namespace delimiters into slashes
+        key = key[1:]                 # remove first slash (absolute)
+        if not self.case_sensitive:
+            key = key.lower()           # coerce to lowercase
+        return os.path.normpath(key)
 
-    with open(path, 'w') as f:
-      f.write(value)
+    def path(self, key):
+        '''Returns the `path` for given `key`'''
+        return os.path.join(self.root_path, self.relative_path(key))
 
-  def _read_object(self, path):
-    '''read in object from file at `path`'''
-    if not os.path.exists(path):
-      return None
+    def relative_object_path(self, key):
+        '''Returns the relative path for object pointed by `key`.'''
+        return self.relative_path(key) + self.object_extension
 
-    if os.path.isdir(path):
-      raise RuntimeError('%s is a directory, not a file.' % path)
-
-    with open(path) as f:
-      file_contents = f.read()
-
-    return file_contents
-
-  def _read_object_gen(self, iterable):
-    '''Generator that reads objects in from filenames in `iterable`.'''
-    for filename in iterable:
-      yield self._read_object(filename)
+    def object_path(self, key):
+        '''return the object path for `key`.'''
+        return os.path.join(self.root_path, self.relative_object_path(key))
 
 
-  # Datastore implementation
+    # object IO
 
-  def get(self, key):
-    '''Return the object named by key or None if it does not exist.
+    def _write_object(self, path, value):
+        '''write out `object` to file at `path`'''
+        ensure_directory_exists(os.path.dirname(path))
 
-    Args:
-      key: Key naming the object to retrieve
+        with open(path, 'w') as f:
+            f.write(value)
 
-    Returns:
-      object or None
-    '''
-    path = self.object_path(key)
-    return self._read_object(path)
+    def _read_object(self, path):
+        '''read in object from file at `path`'''
+        if not os.path.exists(path):
+            return None
+
+        if os.path.isdir(path):
+            raise RuntimeError('%s is a directory, not a file.' % path)
+
+        with open(path) as f:
+            file_contents = f.read()
+
+        return file_contents
+
+    def _read_object_gen(self, iterable):
+        '''Generator that reads objects in from filenames in `iterable`.'''
+        for filename in iterable:
+            yield self._read_object(filename)
 
 
-  def put(self, key, value):
-    '''Stores the object `value` named by `key`.
+    # Datastore implementation
 
-    Args:
-      key: Key naming `value`
-      value: the object to store.
-    '''
-    path = self.object_path(key)
-    self._write_object(path, value)
+    def get(self, key):
+        '''Return the object named by key or None if it does not exist.
 
-  def delete(self, key):
-    '''Removes the object named by `key`.
+        Args:
+          key: Key naming the object to retrieve
 
-    Args:
-      key: Key naming the object to remove.
-    '''
-    path = self.object_path(key)
-    if os.path.exists(path):
-      os.remove(path)
+        Returns:
+          object or None
+        '''
+        path = self.object_path(key)
+        return self._read_object(path)
 
-    #TODO: delete dirs if empty?
 
-  def query(self, query):
-    '''Returns an iterable of objects matching criteria expressed in `query`
-    FSDatastore.query queries all the `.obj` files within the directory
-    specified by the query.key.
+    def put(self, key, value):
+        '''Stores the object `value` named by `key`.
 
-    Args:
-      query: Query object describing the objects to return.
+        Args:
+          key: Key naming `value`
+          value: the object to store.
+        '''
+        path = self.object_path(key)
+        self._write_object(path, value)
 
-    Raturns:
-      Cursor with all objects matching criteria
-    '''
-    path = self.path(query.key)
+    def delete(self, key):
+        '''Removes the object named by `key`.
 
-    if os.path.exists(path):
-      filenames = os.listdir(path)
-      filenames = list(set(filenames) - set(self.ignore_list))
-      filenames = [os.path.join(path, f) for f in filenames]
-      iterable = self._read_object_gen(filenames)
-    else:
-      iterable = list()
+        Args:
+          key: Key naming the object to remove.
+        '''
+        path = self.object_path(key)
+        if os.path.exists(path):
+            os.remove(path)
 
-    return query(iterable) # must apply filters, etc naively.
+        #TODO: delete dirs if empty?
 
-  def contains(self, key):
-    '''Returns whether the object named by `key` exists.
-    Optimized to only check whether the file object exists.
+    def query(self, query):
+        '''Returns an iterable of objects matching criteria expressed in `query`
+        FSDatastore.query queries all the `.obj` files within the directory
+        specified by the query.key.
 
-    Args:
-      key: Key naming the object to check.
+        Args:
+          query: Query object describing the objects to return.
 
-    Returns:
-      boalean whether the object exists
-    '''
-    path = self.object_path(key)
-    return os.path.exists(path) and os.path.isfile(path)
+        Raturns:
+          Cursor with all objects matching criteria
+        '''
+        path = self.path(query.key)
+
+        if os.path.exists(path):
+            filenames = os.listdir(path)
+            filenames = list(set(filenames) - set(self.ignore_list))
+            filenames = [os.path.join(path, f) for f in filenames]
+            iterable = self._read_object_gen(filenames)
+        else:
+            iterable = list()
+
+        return query(iterable) # must apply filters, etc naively.
+
+    def contains(self, key):
+        '''Returns whether the object named by `key` exists.
+        Optimized to only check whether the file object exists.
+
+        Args:
+          key: Key naming the object to check.
+
+        Returns:
+          boalean whether the object exists
+        '''
+        path = self.object_path(key)
+        return os.path.exists(path) and os.path.isfile(path)
