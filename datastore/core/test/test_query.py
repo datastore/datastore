@@ -7,6 +7,7 @@ import nanotime
 from ..key import Key
 from ..query import Filter, Order, Query, Cursor
 
+from time import sleep
 
 
 def version_objects():
@@ -21,7 +22,7 @@ def version_objects():
     sr1['committed'] = nanotime.now().nanoseconds()
     sr1['attributes'] = {'str' : {'value' : 'herp'} }
     sr1['type'] = 'Hurr'
-
+    sleep(1)
     sr2 = {}
     sr2['key'] = '/ABCD'
     sr2['hash'] = hashlib.sha1(str3).hexdigest()
@@ -30,7 +31,7 @@ def version_objects():
     sr2['committed'] = nanotime.now().nanoseconds()
     sr2['attributes'] = {'str' : {'value' : 'derp'} }
     sr2['type'] = 'Hurr'
-
+    sleep(1)
     sr3 = {}
     sr3['key'] = '/ABCD'
     sr3['hash'] = hashlib.sha1(str2).hexdigest()
@@ -306,23 +307,23 @@ class TestOrder(unittest.TestCase):
         self.assertNotEqual(o3.keyfn(v1), (v3['created']))
 
         # test sorted
-        self.assertEqual(Order.sorted([v3, v2, v1], [o1]), [v3, v2, v1])
-        self.assertEqual(Order.sorted([v3, v2, v1], [o1, o2]), [v1, v2, v3])
-        self.assertEqual(Order.sorted([v1, v3, v2], [o1, o3]), [v3, v2, v1])
-        self.assertEqual(Order.sorted([v3, v2, v1], [o1, o2, o3]), [v1, v2, v3])
-        self.assertEqual(Order.sorted([v1, v3, v2], [o1, o3, o2]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o1]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o1, o2]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v1, v3, v2], [o1, o3]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o1, o2, o3]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v1, v3, v2], [o1, o3, o2]), [v3, v2, v1])
 
-        self.assertEqual(Order.sorted([v3, v2, v1], [o2]), [v1, v2, v3])
-        self.assertEqual(Order.sorted([v3, v2, v1], [o2, o1]), [v1, v2, v3])
-        self.assertEqual(Order.sorted([v3, v2, v1], [o2, o3]), [v1, v2, v3])
-        self.assertEqual(Order.sorted([v3, v2, v1], [o2, o1, o3]), [v1, v2, v3])
-        self.assertEqual(Order.sorted([v3, v2, v1], [o2, o3, o1]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o2]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o2, o1]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o2, o3]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o2, o1, o3]), [v1, v2, v3])
+        self.assertEqual(Order.get_sorted([v3, v2, v1], [o2, o3, o1]), [v1, v2, v3])
 
-        self.assertEqual(Order.sorted([v1, v2, v3], [o3]), [v3, v2, v1])
-        self.assertEqual(Order.sorted([v1, v2, v3], [o3, o2]), [v3, v2, v1])
-        self.assertEqual(Order.sorted([v1, v2, v3], [o3, o1]), [v3, v2, v1])
-        self.assertEqual(Order.sorted([v1, v2, v3], [o3, o2, o1]), [v3, v2, v1])
-        self.assertEqual(Order.sorted([v1, v2, v3], [o3, o1, o2]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v1, v2, v3], [o3]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o2]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o1]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o2, o1]), [v3, v2, v1])
+        self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o1, o2]), [v3, v2, v1])
 
 
     def test_object(self):
