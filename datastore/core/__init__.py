@@ -12,37 +12,37 @@ different strengths without committing the application to one datastore
 throughout its lifetime.
 '''
 
-import key
-from key import Key
-from key import Namespace
+from . import key
+from .key import Key
+from .key import Namespace
 
-import basic
-from basic import Datastore
-from basic import NullDatastore
-from basic import DictDatastore
-from basic import InterfaceMappingDatastore
+from . import basic
+from .basic import Datastore
+from .basic import NullDatastore
+from .basic import DictDatastore
+from .basic import InterfaceMappingDatastore
 
-from basic import ShimDatastore
-from basic import CacheShimDatastore
-from basic import LoggingDatastore
-from basic import KeyTransformDatastore
-from basic import LowercaseKeyDatastore
-from basic import NamespaceDatastore
-from basic import NestedPathDatastore
-from basic import SymlinkDatastore
-from basic import DirectoryTreeDatastore
-from basic import DirectoryDatastore
+from .basic import ShimDatastore
+from .basic import CacheShimDatastore
+from .basic import LoggingDatastore
+from .basic import KeyTransformDatastore
+from .basic import LowercaseKeyDatastore
+from .basic import NamespaceDatastore
+from .basic import NestedPathDatastore
+from .basic import SymlinkDatastore
+from .basic import DirectoryTreeDatastore
+from .basic import DirectoryDatastore
 
-from basic import DatastoreCollection
-from basic import ShardedDatastore
-from basic import TieredDatastore
+from .basic import DatastoreCollection
+from .basic import ShardedDatastore
+from .basic import TieredDatastore
 
-import query
-from query import Query
-from query import Cursor
+from . import query
+from .query import Query
+from .query import Cursor
 
-import serialize
-from serialize import SerializerShimDatastore
+from . import serialize
+from .serialize import SerializerShimDatastore
 
 
 # patch datastore with core variables
@@ -51,7 +51,7 @@ datastore.__version__ = __version__
 datastore.__author__ = __author__
 datastore.__email__ = __email__
 
-for k, v in locals().items():
+for k, v in list(locals().items()):
   if k in ['datastore']:
     continue
 

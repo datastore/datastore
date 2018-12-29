@@ -1,6 +1,6 @@
 
-from key import Key
-from query import Cursor
+from .key import Key
+from .query import Cursor
 
 class Datastore(object):
   '''A Datastore represents storage for any key-value pair.
@@ -138,7 +138,7 @@ class DictDatastore(Datastore):
     '''
     try:
       return self._collection(key)[key]
-    except KeyError, e:
+    except KeyError as e:
       return None
 
   def put(self, key, value):
@@ -168,7 +168,7 @@ class DictDatastore(Datastore):
 
       if len(self._collection(key)) == 0:
         del self._items[str(key.path)]
-    except KeyError, e:
+    except KeyError as e:
       pass
 
   def contains(self, key):
@@ -200,12 +200,12 @@ class DictDatastore(Datastore):
 
     # entire dataset already in memory, so ok to apply query naively
     if str(query.key) in self._items:
-      return query(self._items[str(query.key)].values())
+      return query(list(self._items[str(query.key)].values()))
     else:
       return query([])
 
   def __len__(self):
-    return sum(map(len, self._items.values()))
+    return sum(map(len, list(self._items.values())))
 
 
 
@@ -668,7 +668,7 @@ class NestedPathDatastore(KeyTransformDatastore):
         >>> NestedPathDatastore.nested_path('abcdefghijk', 3, 10)
         'abcdefghij/k'
     '''
-    components = [path[n:n+length] for n in xrange(0, len(path), length)]
+    components = [path[n:n+length] for n in range(0, len(path), length)]
     components = components[:depth]
     return '/'.join(components)
 

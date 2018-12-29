@@ -1,5 +1,5 @@
 
-from key import Key
+from .key import Key
 
 
 def _object_getattr(obj, field):
@@ -445,7 +445,7 @@ class Query(object):
     '''Constructs a query from a dictionary.'''
     query = cls(Key(dictionary['key']))
 
-    for key, value in dictionary.items():
+    for key, value in list(dictionary.items()):
 
       if key == 'order':
         for order in value:
@@ -496,14 +496,14 @@ class Cursor(object):
     self._iterator = iter(self._iterable)
     return self
 
-  def next(self):
+  def __next__(self):
     '''Iterator next. Build up count of returned elements during iteration.'''
 
     # if iteration has not begun, begin it.
     if not self._iterator:
       self.__iter__()
 
-    next = self._iterator.next()
+    next = next(self._iterator)
     if next is not StopIteration:
       self._returned_inc(next)
     return next

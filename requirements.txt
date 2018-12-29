@@ -1,3 +1,4 @@
 nose==1.3.1
-bson==0.3.3
+bson==0.5.7
 nanotime==0.5.2
+pytest

@@ -16,7 +16,7 @@ class TestDatastore(unittest.TestCase):
     try:
       for sn in self.stores:
         self.assertEqual(len(sn), len)
-    except TypeError, e:
+    except TypeError as e:
       pass
 
   def subtest_remove_nonexistent(self):
@@ -78,7 +78,7 @@ class TestDatastore(unittest.TestCase):
         #self.assertEqual(result, expected)
 
       except NotImplementedError:
-        print 'WARNING: %s does not implement query.' % sn
+        print(('WARNING: %s does not implement query.' % sn))
 
     return resultset
 
@@ -860,7 +860,7 @@ class TestDirectoryDatastore(TestDatastore):
     # generator
     with self.assertRaises(StopIteration):
       gen = ds.directoryRead(dir_key)
-      gen.next()
+      next(gen)
 
 
   def test_directory_double_add(self):
@@ -1001,7 +1001,7 @@ class TestDatastoreCollection(TestDatastore):
     stores = [s1, s2, s3, s4, s5]
     hash = lambda key: int(key.name) * len(stores) / numelems
     sharded = ShardedDatastore(stores, shardingfn=hash)
-    sumlens = lambda stores: sum(map(lambda s: len(s), stores))
+    sumlens = lambda stores: sum([len(s) for s in stores])
 
     def checkFor(key, value, sharded, shard=None):
       correct_shard = sharded._stores[hash(key) % len(sharded._stores)]

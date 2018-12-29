@@ -8,7 +8,7 @@ pkgname = 'datastore'
 # gather the package information
 main_py = open('datastore/core/__init__.py').read()
 metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", main_py))
-packages = filter(lambda p: p.startswith(pkgname), find_packages())
+packages = [p for p in find_packages() if p.startswith(pkgname)]
 
 # convert the readme to pypi compatible rst
 try:
@@ -18,7 +18,7 @@ try:
   except ImportError:
     readme = open('README.md').read()
 except:
-  print 'something went wrong reading the README.md file.'
+  print('something went wrong reading the README.md file.')
   readme = ''
 
 setup(

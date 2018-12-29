@@ -21,10 +21,10 @@ class TestFileSystemDatastore(TestDatastore):
     shutil.rmtree(self.tmp)
 
   def test_datastore(self):
-    dirs = map(str, range(0, 4))
-    dirs = map(lambda d: os.path.join(self.tmp, d), dirs)
-    fses = map(FileSystemDatastore, dirs)
-    dses = map(serialize.shim, fses)
+    dirs = list(map(str, list(range(0, 4))))
+    dirs = [os.path.join(self.tmp, d) for d in dirs]
+    fses = list(map(FileSystemDatastore, dirs))
+    dses = list(map(serialize.shim, fses))
     self.subtest_simple(dses, numelems=500)
 
 

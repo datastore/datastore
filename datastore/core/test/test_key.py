@@ -58,12 +58,12 @@ class KeyTests(unittest.TestCase):
     self.__subtest_basic('abcde')
     self.__subtest_basic('disahfidsalfhduisaufidsail')
     self.__subtest_basic('/fdisahfodisa/fdsa/fdsafdsafdsafdsa/fdsafdsa/')
-    self.__subtest_basic(u'4215432143214321432143214321')
+    self.__subtest_basic('4215432143214321432143214321')
     self.__subtest_basic('/fdisaha////fdsa////fdsafdsafdsafdsa/fdsafdsa/')
     self.__subtest_basic('abcde:fdsfd')
     self.__subtest_basic('disahfidsalfhduisaufidsail:fdsa')
     self.__subtest_basic('/fdisahfodisa/fdsa/fdsafdsafdsafdsa/fdsafdsa/:')
-    self.__subtest_basic(u'4215432143214321432143214321:')
+    self.__subtest_basic('4215432143214321432143214321:')
     self.__subtest_basic('/fdisaha////fdsa////fdsafdsafdsafdsa/fdsafdsa/f:fdaf')
 
 
@@ -109,14 +109,14 @@ class KeyTests(unittest.TestCase):
 
     for i in range(0, 200):
       key = randomKey()
-      while key in keys.values():
+      while key in list(keys.values()):
         key = randomKey()
 
       hstr = str(hash(key))
       self.assertFalse(hstr in keys)
       keys[hstr] = key
 
-    for key in keys.values():
+    for key in list(keys.values()):
       hstr = str(hash(key))
       self.assertTrue(hstr in keys)
       self.assertEqual(key, keys[hstr])

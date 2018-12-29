@@ -211,7 +211,7 @@ class FileSystemDatastore(datastore.Datastore):
     if os.path.exists(path):
       filenames = os.listdir(path)
       filenames = list(set(filenames) - set(self.ignore_list))
-      filenames = map(lambda f: os.path.join(path, f), filenames)
+      filenames = [os.path.join(path, f) for f in filenames]
       iterable = self._read_object_gen(filenames)
     else:
       iterable = list()

@@ -84,7 +84,7 @@ class Key(object):
     Note that this method assumes the key is immutable.
     '''
     if not self._list:
-      self._list = map(Namespace, self._string.split('/'))
+      self._list = list(map(Namespace, self._string.split('/')))
     return self._list
 
   @property
@@ -215,6 +215,6 @@ class Key(object):
   @classmethod
   def removeDuplicateSlashes(cls, path):
     '''Returns the path string `path` without duplicate slashes.'''
-    return '/' + '/'.join(filter(lambda p: p != '', path.split('/')))
+    return '/' + '/'.join([p for p in path.split('/') if p != ''])
 
 

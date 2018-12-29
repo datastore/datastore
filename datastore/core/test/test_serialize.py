@@ -4,7 +4,7 @@ import unittest
 from ..key import Key
 from ..basic import DictDatastore
 from ..serialize import *
-from test_basic import TestDatastore
+from .test_basic import TestDatastore
 
 import pickle
 import bson
@@ -19,8 +19,8 @@ class TestSerialize(TestDatastore):
   def test_basic(self):
 
     value = 'test_value_%s' % self
-    values_raw = [{'value': i} for i in xrange(0, 1000)]
-    values_json = map(json.dumps, values_raw)
+    values_raw = [{'value': i} for i in range(0, 1000)]
+    values_json = list(map(json.dumps, values_raw))
 
     # test protocol
     self.assertRaises(NotImplementedError, Serializer.loads, value)
@@ -40,8 +40,8 @@ class TestSerialize(TestDatastore):
 
     # test stack
     stack = Stack([json, map_serializer, bson])
-    values_serialized = map(stack.dumps, values_raw)
-    values_deserialized = map(stack.loads, values_serialized)
+    values_serialized = list(map(stack.dumps, values_raw))
+    values_deserialized = list(map(stack.loads, values_serialized))
     self.assertEqual(values_deserialized, values_raw)
 
 
@@ -50,7 +50,7 @@ class TestSerialize(TestDatastore):
     child = DictDatastore()
     shim = SerializerShimDatastore(child, serializer=serializer)
 
-    values_raw = [{'value': i} for i in xrange(0, numelems)]
+    values_raw = [{'value': i} for i in range(0, numelems)]
 
     values_serial = [serializer.dumps(v) for v in values_raw]
     values_deserial = [serializer.loads(v) for v in values_serial]

@@ -42,8 +42,8 @@ source_suffix = '.rst'
 master_doc = 'index'
 
 # General information about the project.
-project = u'datastore'
-copyright = u'2011, Juan Batiz-Benet'
+project = 'datastore'
+copyright = '2011, Juan Batiz-Benet'
 
 # The version info for the project you're documenting, acts as replacement for
 # |version| and |release|, also used in various other places throughout the
@@ -180,8 +180,8 @@ htmlhelp_basename = 'datastoredoc'
 # Grouping the document tree into LaTeX files. List of tuples
 # (source start file, target name, title, author, documentclass [howto/manual]).
 latex_documents = [
-  ('index', 'datastore.tex', u'datastore Documentation',
-   u'Juan Batiz-Benet', 'manual'),
+  ('index', 'datastore.tex', 'datastore Documentation',
+   'Juan Batiz-Benet', 'manual'),
 ]
 
 # The name of an image file (relative to this directory) to place at the top of
@@ -213,8 +213,8 @@ latex_documents = [
 # One entry per manual page. List of tuples
 # (source start file, name, description, authors, manual section).
 man_pages = [
-    ('index', 'datastore', u'datastore Documentation',
-     [u'Juan Batiz-Benet'], 1)
+    ('index', 'datastore', 'datastore Documentation',
+     ['Juan Batiz-Benet'], 1)
 ]
 
 
