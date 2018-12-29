@@ -1,6 +1,7 @@
 
 from .key import Key
 
+from functools import cmp_to_key
 
 def _object_getattr(obj, field):
     '''Attribute getter for the objects to operate on.
@@ -164,7 +165,7 @@ class Filter(object):
 
 
     def __eq__(self, o):
-        return self.field == o.field and self.op == o.op and self.value == o.value
+        return self.field == o.field and self.op == o.op and repr(self.value) == repr(o.value)
 
     def __ne__(self, other):
         return not self.__eq__(other)
@@ -268,6 +269,8 @@ class Order(object):
         '''Returns a function that will compare two items according to `orders`'''
         comparers = [ (o.keyfn, 1 if o.isAscending() else -1) for o in orders]
 
+        def cmp(a, b):
+            return (a > b) - (a < b)
         def cmpfn(a, b):
             for keyfn, ascOrDesc in comparers:
                 comparison = cmp(keyfn(a), keyfn(b)) * ascOrDesc
@@ -278,9 +281,13 @@ class Order(object):
         return cmpfn
 
     @classmethod
-    def sorted(cls, items, orders):
-        '''Returns the elements in `items` sorted according to `orders`'''
-        return sorted(items, cmp=cls.multipleOrderComparison(orders))
+    def get_sorted(cls, items, orders):
+        '''Returns the elements in `items` sorted according to `orders`
+        TODO: update cmpfn to py3 grammar
+        '''
+
+        keyf = cmp_to_key(cls.multipleOrderComparison(orders))
+        return sorted(items, key=keyf)
 
 
 
@@ -402,9 +409,14 @@ class Query(object):
         self.filters.append(filter)
         return self # for chaining
 
+    def __lt__(self, other):
+        return self.dict() < other.dict()
 
-    def __cmp__(self, other):
-        return cmp(self.dict(), other.dict())
+    def __gt__(self,other):
+        return self.dict() > other.dict()
+
+    def __eq__(self, other):
+        return self.dict() == other.dict()
 
     def __hash__(self):
         return hash(repr(self))
@@ -536,7 +548,7 @@ class Cursor(object):
         self._ensure_modification_is_safe()
 
         if len(self.query.orders) > 0:
-            self._iterable = Order.sorted(self._iterable, self.query.orders)
+            self._iterable = Order.get_sorted(self._iterable, self.query.orders)
             # not a generator :(
 
     def apply_offset(self):

@@ -38,7 +38,9 @@ class KeyTests(unittest.TestCase):
         self.assertTrue(Key(string).child('a') < Key(string).child('b'))
         self.assertTrue(Key(string) == Key(string))
 
-        self.assertRaises(TypeError, cmp, Key(string), string)
+        self.assertRaises(TypeError, Key(string).__gt__, string)
+        self.assertRaises(TypeError, Key(string).__lt__, string)
+        self.assertRaises(TypeError, Key(string).__eq__, string)
 
         split = fixedString.split('/')
         if len(split) > 1:
