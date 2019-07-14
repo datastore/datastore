@@ -1,5 +1,5 @@
-import time
-import datetime
+# import time
+# import datetime
 import unittest
 import hashlib
 import nanotime
@@ -14,44 +14,34 @@ def version_objects():
     str1 = 'herp'.encode('utf-8')
     str2 = 'lerp'.encode('utf-8')
     str3 = 'derp'.encode('utf-8')
-    sr1 = {}
-    sr1['key'] = '/ABCD'
-    sr1['hash'] = hashlib.sha1(str1).hexdigest()
-    sr1['parent'] = '0000000000000000000000000000000000000000'
-    sr1['created'] = nanotime.now().nanoseconds()
-    sr1['committed'] = nanotime.now().nanoseconds()
-    sr1['attributes'] = {'str' : {'value' : 'herp'} }
-    sr1['type'] = 'Hurr'
+    sr1 = {'key': '/ABCD', 'hash': hashlib.sha1(str1).hexdigest(),
+           'parent': '0000000000000000000000000000000000000000',
+           'created': nanotime.now().nanoseconds(),
+           'committed': nanotime.now().nanoseconds(),
+           'attributes': {'str': {'value': 'herp'}}, 'type': 'Hurr'}
     sleep(1)
-    sr2 = {}
-    sr2['key'] = '/ABCD'
-    sr2['hash'] = hashlib.sha1(str3).hexdigest()
-    sr2['parent'] = hashlib.sha1(str1).hexdigest()
-    sr2['created'] = nanotime.now().nanoseconds()
-    sr2['committed'] = nanotime.now().nanoseconds()
-    sr2['attributes'] = {'str' : {'value' : 'derp'} }
-    sr2['type'] = 'Hurr'
+    sr2 = {'key': '/ABCD', 'hash': hashlib.sha1(str3).hexdigest(),
+           'parent': hashlib.sha1(str1).hexdigest(),
+           'created': nanotime.now().nanoseconds(),
+           'committed': nanotime.now().nanoseconds(),
+           'attributes': {'str': {'value': 'derp'}}, 'type': 'Hurr'}
     sleep(1)
-    sr3 = {}
-    sr3['key'] = '/ABCD'
-    sr3['hash'] = hashlib.sha1(str2).hexdigest()
-    sr3['parent'] = hashlib.sha1(str3).hexdigest()
-    sr3['created'] = nanotime.now().nanoseconds()
-    sr3['committed'] = nanotime.now().nanoseconds()
-    sr3['attributes'] = {'str' : {'value' : 'lerp'} }
-    sr3['type'] = 'Hurr'
+    sr3 = {'key': '/ABCD', 'hash': hashlib.sha1(str2).hexdigest(),
+           'parent': hashlib.sha1(str3).hexdigest(),
+           'created': nanotime.now().nanoseconds(),
+           'committed': nanotime.now().nanoseconds(),
+           'attributes': {'str': {'value': 'lerp'}}, 'type': 'Hurr'}
 
     return sr1, sr2, sr3
 
 
 class TestFilter(unittest.TestCase):
 
-    def assertFilter(self, filter, objects, match):
-        result = [o for o in Filter.filter(filter, objects)]
+    def assertFilter(self, a_filter, objects, match):
+        result = [o for o in Filter.filter(a_filter, objects)]
         self.assertEqual(result, match)
 
     def test_basic(self):
-
         v1, v2, v3 = version_objects()
         vs = [v1, v2, v3]
 
@@ -59,104 +49,104 @@ class TestFilter(unittest.TestCase):
         t2 = v2['committed']
         t3 = v3['committed']
 
-        fkgtA = Filter('key', '>', '/A')
+        fkgt_a = Filter('key', '>', '/A')
 
-        self.assertTrue(fkgtA(v1))
-        self.assertTrue(fkgtA(v2))
-        self.assertTrue(fkgtA(v3))
+        self.assertTrue(fkgt_a(v1))
+        self.assertTrue(fkgt_a(v2))
+        self.assertTrue(fkgt_a(v3))
 
-        self.assertTrue(fkgtA.valuePasses('/BCDEG'))
-        self.assertTrue(fkgtA.valuePasses('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
-        self.assertFalse(fkgtA.valuePasses('/6353456346543'))
-        self.assertFalse(fkgtA.valuePasses('.'))
-        self.assertTrue(fkgtA.valuePasses('afsdafdsa'))
+        self.assertTrue(fkgt_a.value_passes('/BCDEG'))
+        self.assertTrue(fkgt_a.value_passes('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
+        self.assertFalse(fkgt_a.value_passes('/6353456346543'))
+        self.assertFalse(fkgt_a.value_passes('.'))
+        self.assertTrue(fkgt_a.value_passes('afsdafdsa'))
 
-        self.assertFilter(fkgtA, vs, vs)
+        self.assertFilter(fkgt_a, vs, vs)
 
-        fkltA = Filter('key', '<', '/A')
+        fklt_a = Filter('key', '<', '/A')
 
-        self.assertFalse(fkltA(v1))
-        self.assertFalse(fkltA(v2))
-        self.assertFalse(fkltA(v3))
+        self.assertFalse(fklt_a(v1))
+        self.assertFalse(fklt_a(v2))
+        self.assertFalse(fklt_a(v3))
 
-        self.assertFalse(fkltA.valuePasses('/BCDEG'))
-        self.assertFalse(fkltA.valuePasses('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
-        self.assertTrue(fkltA.valuePasses('/6353456346543'))
-        self.assertTrue(fkltA.valuePasses('.'))
-        self.assertFalse(fkltA.valuePasses('A'))
-        self.assertFalse(fkltA.valuePasses('afsdafdsa'))
+        self.assertFalse(fklt_a.value_passes('/BCDEG'))
+        self.assertFalse(fklt_a.value_passes('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
+        self.assertTrue(fklt_a.value_passes('/6353456346543'))
+        self.assertTrue(fklt_a.value_passes('.'))
+        self.assertFalse(fklt_a.value_passes('A'))
+        self.assertFalse(fklt_a.value_passes('afsdafdsa'))
 
-        self.assertFilter(fkltA, vs, [])
+        self.assertFilter(fklt_a, vs, [])
 
-        fkeqA = Filter('key', '=', '/ABCD')
+        fkeq_a = Filter('key', '=', '/ABCD')
 
-        self.assertTrue(fkeqA(v1))
-        self.assertTrue(fkeqA(v2))
-        self.assertTrue(fkeqA(v3))
+        self.assertTrue(fkeq_a(v1))
+        self.assertTrue(fkeq_a(v2))
+        self.assertTrue(fkeq_a(v3))
 
-        self.assertFalse(fkeqA.valuePasses('/BCDEG'))
-        self.assertFalse(fkeqA.valuePasses('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
-        self.assertFalse(fkeqA.valuePasses('/6353456346543'))
-        self.assertFalse(fkeqA.valuePasses('A'))
-        self.assertFalse(fkeqA.valuePasses('.'))
-        self.assertFalse(fkeqA.valuePasses('afsdafdsa'))
-        self.assertTrue(fkeqA.valuePasses('/ABCD'))
+        self.assertFalse(fkeq_a.value_passes('/BCDEG'))
+        self.assertFalse(fkeq_a.value_passes('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
+        self.assertFalse(fkeq_a.value_passes('/6353456346543'))
+        self.assertFalse(fkeq_a.value_passes('A'))
+        self.assertFalse(fkeq_a.value_passes('.'))
+        self.assertFalse(fkeq_a.value_passes('afsdafdsa'))
+        self.assertTrue(fkeq_a.value_passes('/ABCD'))
 
-        self.assertFilter(fkeqA, vs, vs)
-        self.assertFilter([fkeqA, fkltA], vs, [])
-        self.assertFilter([fkeqA, fkeqA], vs, vs)
+        self.assertFilter(fkeq_a, vs, vs)
+        self.assertFilter([fkeq_a, fklt_a], vs, [])
+        self.assertFilter([fkeq_a, fkeq_a], vs, vs)
 
-        fkgtB = Filter('key', '>', '/B')
+        fkgt_b = Filter('key', '>', '/B')
 
-        self.assertFalse(fkgtB(v1))
-        self.assertFalse(fkgtB(v2))
-        self.assertFalse(fkgtB(v3))
+        self.assertFalse(fkgt_b(v1))
+        self.assertFalse(fkgt_b(v2))
+        self.assertFalse(fkgt_b(v3))
 
-        self.assertFalse(fkgtB.valuePasses('/A'))
-        self.assertTrue(fkgtB.valuePasses('/BCDEG'))
-        self.assertTrue(fkgtB.valuePasses('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
-        self.assertFalse(fkgtB.valuePasses('/6353456346543'))
-        self.assertFalse(fkgtB.valuePasses('.'))
-        self.assertTrue(fkgtB.valuePasses('A'))
-        self.assertTrue(fkgtB.valuePasses('afsdafdsa'))
+        self.assertFalse(fkgt_b.value_passes('/A'))
+        self.assertTrue(fkgt_b.value_passes('/BCDEG'))
+        self.assertTrue(fkgt_b.value_passes('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
+        self.assertFalse(fkgt_b.value_passes('/6353456346543'))
+        self.assertFalse(fkgt_b.value_passes('.'))
+        self.assertTrue(fkgt_b.value_passes('A'))
+        self.assertTrue(fkgt_b.value_passes('afsdafdsa'))
 
-        self.assertFilter(fkgtB, vs, [])
-        self.assertFilter([fkgtB, fkgtA], vs, [])
-        self.assertFilter([fkgtB, fkgtB], vs, [])
+        self.assertFilter(fkgt_b, vs, [])
+        self.assertFilter([fkgt_b, fkgt_a], vs, [])
+        self.assertFilter([fkgt_b, fkgt_b], vs, [])
 
-        fkltB = Filter('key', '<', '/B')
+        fklt_b = Filter('key', '<', '/B')
 
-        self.assertTrue(fkltB(v1))
-        self.assertTrue(fkltB(v2))
-        self.assertTrue(fkltB(v3))
+        self.assertTrue(fklt_b(v1))
+        self.assertTrue(fklt_b(v2))
+        self.assertTrue(fklt_b(v3))
 
-        self.assertTrue(fkltB.valuePasses('/A'))
-        self.assertFalse(fkltB.valuePasses('/BCDEG'))
-        self.assertFalse(fkltB.valuePasses('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
-        self.assertTrue(fkltB.valuePasses('/6353456346543'))
-        self.assertTrue(fkltB.valuePasses('.'))
-        self.assertFalse(fkltB.valuePasses('A'))
-        self.assertFalse(fkltB.valuePasses('afsdafdsa'))
+        self.assertTrue(fklt_b.value_passes('/A'))
+        self.assertFalse(fklt_b.value_passes('/BCDEG'))
+        self.assertFalse(fklt_b.value_passes('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
+        self.assertTrue(fklt_b.value_passes('/6353456346543'))
+        self.assertTrue(fklt_b.value_passes('.'))
+        self.assertFalse(fklt_b.value_passes('A'))
+        self.assertFalse(fklt_b.value_passes('afsdafdsa'))
 
-        self.assertFilter(fkltB, vs, vs)
+        self.assertFilter(fklt_b, vs, vs)
 
-        fkgtAB = Filter('key', '>', '/AB')
+        fkgt_ab = Filter('key', '>', '/AB')
 
-        self.assertTrue(fkgtAB(v1))
-        self.assertTrue(fkgtAB(v2))
-        self.assertTrue(fkgtAB(v3))
+        self.assertTrue(fkgt_ab(v1))
+        self.assertTrue(fkgt_ab(v2))
+        self.assertTrue(fkgt_ab(v3))
 
-        self.assertFalse(fkgtAB.valuePasses('/A'))
-        self.assertTrue(fkgtAB.valuePasses('/BCDEG'))
-        self.assertTrue(fkgtAB.valuePasses('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
-        self.assertFalse(fkgtAB.valuePasses('/6353456346543'))
-        self.assertFalse(fkgtAB.valuePasses('.'))
-        self.assertTrue(fkgtAB.valuePasses('A'))
-        self.assertTrue(fkgtAB.valuePasses('afsdafdsa'))
+        self.assertFalse(fkgt_ab.value_passes('/A'))
+        self.assertTrue(fkgt_ab.value_passes('/BCDEG'))
+        self.assertTrue(fkgt_ab.value_passes('/ZCDEFDSA/fdsafdsa/fdsafdsaf'))
+        self.assertFalse(fkgt_ab.value_passes('/6353456346543'))
+        self.assertFalse(fkgt_ab.value_passes('.'))
+        self.assertTrue(fkgt_ab.value_passes('A'))
+        self.assertTrue(fkgt_ab.value_passes('afsdafdsa'))
 
-        self.assertFilter(fkgtAB, vs, vs)
-        self.assertFilter([fkgtAB, fkltB], vs, vs)
-        self.assertFilter([fkltB, fkgtAB], vs, vs)
+        self.assertFilter(fkgt_ab, vs, vs)
+        self.assertFilter([fkgt_ab, fklt_b], vs, vs)
+        self.assertFilter([fklt_b, fkgt_ab], vs, vs)
 
         fgtet1 = Filter('committed', '>=', t1)
         fgtet2 = Filter('committed', '>=', t2)
@@ -272,7 +262,6 @@ class TestFilter(unittest.TestCase):
         self.assertNotEqual(hash(f3), hash(Filter('committed', '>=', t2)))
 
 
-
 class TestOrder(unittest.TestCase):
 
     def test_basic(self):
@@ -283,9 +272,9 @@ class TestOrder(unittest.TestCase):
         v1, v2, v3 = version_objects()
 
         # test  isAscending
-        self.assertTrue(o1.isAscending())
-        self.assertTrue(o2.isAscending())
-        self.assertFalse(o3.isAscending())
+        self.assertTrue(o1.is_ascending())
+        self.assertTrue(o2.is_ascending())
+        self.assertFalse(o3.is_ascending())
 
         # test keyfn
         self.assertEqual(o1.keyfn(v1), (v1['key']))
@@ -294,15 +283,15 @@ class TestOrder(unittest.TestCase):
         self.assertEqual(o1.keyfn(v1), (v2['key']))
         self.assertEqual(o1.keyfn(v1), (v3['key']))
 
-        self.assertEqual(o2.keyfn(v1),    (v1['committed']))
-        self.assertEqual(o2.keyfn(v2),    (v2['committed']))
-        self.assertEqual(o2.keyfn(v3),    (v3['committed']))
+        self.assertEqual(o2.keyfn(v1), (v1['committed']))
+        self.assertEqual(o2.keyfn(v2), (v2['committed']))
+        self.assertEqual(o2.keyfn(v3), (v3['committed']))
         self.assertNotEqual(o2.keyfn(v1), (v2['committed']))
         self.assertNotEqual(o2.keyfn(v1), (v3['committed']))
 
-        self.assertEqual(o3.keyfn(v1),    (v1['created']))
-        self.assertEqual(o3.keyfn(v2),    (v2['created']))
-        self.assertEqual(o3.keyfn(v3),    (v3['created']))
+        self.assertEqual(o3.keyfn(v1), (v1['created']))
+        self.assertEqual(o3.keyfn(v2), (v2['created']))
+        self.assertEqual(o3.keyfn(v3), (v3['created']))
         self.assertNotEqual(o3.keyfn(v1), (v2['created']))
         self.assertNotEqual(o3.keyfn(v1), (v3['created']))
 
@@ -324,7 +313,6 @@ class TestOrder(unittest.TestCase):
         self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o1]), [v3, v2, v1])
         self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o2, o1]), [v3, v2, v1])
         self.assertEqual(Order.get_sorted([v1, v2, v3], [o3, o1, o2]), [v3, v2, v1])
-
 
     def test_object(self):
         self.assertEqual(Order('key'), eval(repr(Order('key'))))
@@ -369,12 +357,12 @@ class TestQuery(unittest.TestCase):
         q2.order('key')
         q2.order('-created')
 
-        q1d = {'key': '/', 'limit':100, 'offset':300, \
-               'filter': [['key', '>', '/ABC'], ['created', '>', now]] }
+        q1d = {'key': '/', 'limit': 100, 'offset': 300,
+               'filter': [['key', '>', '/ABC'], ['created', '>', now]]}
 
-        q2d = {'key': '/', 'offset':200, 'order': ['+key', '-created'] }
+        q2d = {'key': '/', 'offset': 200, 'order': ['+key', '-created']}
 
-        q3d = {'key': '/', 'limit':1}
+        q3d = {'key': '/', 'limit': 1}
 
         self.assertEqual(q1.dict(), q1d)
         self.assertEqual(q2.dict(), q2d)
@@ -392,7 +380,6 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(q2, q2.copy())
         self.assertEqual(q3, q3.copy())
 
-
     def test_cursor(self):
 
         k = Key('/')
@@ -400,7 +387,7 @@ class TestQuery(unittest.TestCase):
         self.assertRaises(ValueError, Cursor, None, None)
         self.assertRaises(ValueError, Cursor, Query(Key('/')), None)
         self.assertRaises(ValueError, Cursor, None, [1])
-        c = Cursor(Query(k), [1, 2, 3, 4, 5]) # should not raise
+        c = Cursor(Query(k), [1, 2, 3, 4, 5])  # should not raise
 
         self.assertEqual(c.skipped, 0)
         self.assertEqual(c.returned, 0)
@@ -411,13 +398,13 @@ class TestQuery(unittest.TestCase):
         self.assertEqual(c.skipped, 1)
         self.assertEqual(c.returned, 2)
 
-        c._skipped_inc(None)
-        c._skipped_inc(None)
+        c._skipped_inc()
+        c._skipped_inc()
         self.assertEqual(c.skipped, 3)
 
-        c._returned_inc(None)
-        c._returned_inc(None)
-        c._returned_inc(None)
+        c._returned_inc()
+        c._returned_inc()
+        c._returned_inc()
         self.assertEqual(c.returned, 5)
 
         self.subtest_cursor(Query(k), [5, 4, 3, 2, 1], [5, 4, 3, 2, 1])
@@ -432,7 +419,7 @@ class TestQuery(unittest.TestCase):
 
         t1 = v1['committed']
         t2 = v2['committed']
-        t3 = v3['committed']
+        # t3 = v3['committed']
 
         self.subtest_cursor(Query(k), vs, vs)
         self.subtest_cursor(Query(k, limit=2), vs, [v1, v2])
@@ -444,7 +431,6 @@ class TestQuery(unittest.TestCase):
 
         self.subtest_cursor(Query(k).order('+committed'), vs, [v1, v2, v3])
         self.subtest_cursor(Query(k).order('-created'), vs, [v3, v2, v1])
-
 
     def subtest_cursor(self, query, iterable, expected_results):
 

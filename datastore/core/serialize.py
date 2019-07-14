@@ -1,22 +1,21 @@
 
 
 import json
-from .basic import Datastore, ShimDatastore
+from .basic import ShimDatastore
 
 default_serializer = json
 
 
-
 class Serializer(object):
-    '''Serializing protocol. Serialized data must be a string.'''
+    """Serializing protocol. Serialized data must be a string."""
     @classmethod
     def loads(cls, value):
-        '''returns deserialized `value`.'''
+        """returns deserialized `value`."""
         raise NotImplementedError
 
     @classmethod
     def dumps(cls, value):
-        '''returns serialized `value`.'''
+        """returns serialized `value`."""
         raise NotImplementedError
 
     @staticmethod
@@ -25,92 +24,87 @@ class Serializer(object):
                and hasattr(cls, 'dumps') and callable(cls.dumps)
 
 
-
 class NonSerializer(Serializer):
-    '''Implements serializing protocol but does not serialize at all.
+    """Implements serializing protocol but does not serialize at all.
     If only storing strings (or already-serialized values).
-    '''
+    """
     @classmethod
     def loads(cls, value):
-        '''returns `value`.'''
+        """returns `value`."""
         return value
 
     @classmethod
     def dumps(cls, value):
-        '''returns `value`.'''
+        """returns `value`."""
         return value
 
 
-
-class prettyjson(Serializer):
-    '''json wrapper serializer that pretty-prints.
+class PrettyJson(Serializer):
+    """json wrapper serializer that pretty-prints.
     Useful for human readable values and versioning.
-    '''
+    """
 
     @classmethod
     def loads(cls, value):
-        '''returns json deserialized `value`.'''
+        """returns json deserialized `value`."""
         return json.loads(value)
 
     @classmethod
     def dumps(cls, value):
-        '''returns json serialized `value` (pretty-printed).'''
+        """returns json serialized `value` (pretty-printed)."""
         return json.dumps(value, sort_keys=True, indent=1)
 
 
 class Stack(Serializer, list):
-    '''represents a stack of serializers, applying each serializer in sequence.'''
+    """represents a stack of serializers, applying each serializer in sequence."""
 
     def loads(self, value):
-        '''Returns deserialized `value`.'''
+        """Returns deserialized `value`."""
         for serializer in reversed(self):
             value = serializer.loads(value)
         return value
 
     def dumps(self, value):
-        '''returns serialized `value`.'''
+        """returns serialized `value`."""
         for serializer in self:
             value = serializer.dumps(value)
         return value
 
 
-
-class map_serializer(Serializer):
-    '''map serializer that ensures the serialized value is a mapping type.'''
+class MapSerializer(Serializer):
+    """map serializer that ensures the serialized value is a mapping type."""
 
     sentinel = '@wrapped'
 
     @classmethod
     def loads(cls, value):
-        '''Returns mapping type deserialized `value`.'''
+        """Returns mapping type deserialized `value`."""
         if len(value) == 1 and cls.sentinel in value:
             value = value[cls.sentinel]
         return value
 
     @classmethod
     def dumps(cls, value):
-        '''returns mapping typed serialized `value`.'''
+        """returns mapping typed serialized `value`."""
         if not hasattr(value, '__getitem__') or not hasattr(value, 'iteritems'):
             value = {cls.sentinel: value}
         return value
 
 
-
-
 def deserialized_gen(serializer, iterable):
-    '''Generator that yields deserialized objects from `iterable`.'''
+    """Generator that yields deserialized objects from `iterable`."""
     for item in iterable:
         yield serializer.loads(item)
 
+
 def serialized_gen(serializer, iterable):
-    '''Generator that yields serialized objects from `iterable`.'''
+    """Generator that yields serialized objects from `iterable`."""
     for item in iterable:
         yield serializer.dumps(item)
 
 
-
 def monkey_patch_bson(bson=None):
-    '''Patch bson in pymongo to use loads and dumps interface.'''
+    """Patch bson in pymongo to use loads and dumps interface."""
     if not bson:
         import bson
 
@@ -121,9 +115,8 @@ def monkey_patch_bson(bson=None):
         bson.dumps = lambda document: bson.BSON.encode(document)
 
 
-
 class SerializerShimDatastore(ShimDatastore):
-    '''Represents a Datastore that serializes and deserializes values.
+    """Represents a Datastore that serializes and deserializes values.
 
     As data is ``put``, the serializer shim serializes it and ``put``s it into
     the underlying ``child_datastore``. Correspondingly, on the way out (through
@@ -134,7 +127,7 @@ class SerializerShimDatastore(ShimDatastore):
       datastore: a child datastore for the ShimDatastore superclass.
 
       serializer: a serializer object (responds to loads and dumps).
-    '''
+    """
 
     # value serializer
     # override this with their own custom serializer on a class-wide or per-
@@ -142,35 +135,33 @@ class SerializerShimDatastore(ShimDatastore):
     serializer = default_serializer
 
     def __init__(self, datastore, serializer=None):
-        '''Initializes internals and tests the serializer.
+        """Initializes internals and tests the serializer.
 
         Args:
           datastore: a child datastore for the ShimDatastore superclass.
 
           serializer: a serializer object (responds to loads and dumps).
-        '''
+        """
         super(SerializerShimDatastore, self).__init__(datastore)
 
         if serializer:
             self.serializer = serializer
 
         # ensure serializer works
-        test = { 'value': repr(self) }
+        test = {'value': repr(self)}
         errstr = 'Serializer error: serialized value does not match original'
         assert self.serializer.loads(self.serializer.dumps(test)) == test, errstr
 
-
-    def serializedValue(self, value):
-        '''Returns serialized `value` or None.'''
+    def serialized_value(self, value):
+        """Returns serialized `value` or None."""
         return self.serializer.dumps(value) if value is not None else None
 
-    def deserializedValue(self, value):
-        '''Returns deserialized `value` or None.'''
+    def deserialized_value(self, value):
+        """Returns deserialized `value` or None."""
         return self.serializer.loads(value) if value is not None else None
 
-
     def get(self, key):
-        '''Return the object named by key or None if it does not exist.
+        """Return the object named by key or None if it does not exist.
         Retrieves the value from the ``child_datastore``, and de-serializes
         it on the way out.
 
@@ -179,27 +170,27 @@ class SerializerShimDatastore(ShimDatastore):
 
         Returns:
           object or None
-        '''
+        """
 
-        ''''''
+        """"""
         value = self.child_datastore.get(key)
-        return self.deserializedValue(value)
+        return self.deserialized_value(value)
 
     def put(self, key, value):
-        '''Stores the object `value` named by `key`.
+        """Stores the object `value` named by `key`.
         Serializes values on the way in, and stores the serialized data into the
         ``child_datastore``.
 
         Args:
           key: Key naming `value`
           value: the object to store.
-        '''
+        """
 
-        value = self.serializedValue(value)
+        value = self.serialized_value(value)
         self.child_datastore.put(key, value)
 
     def query(self, query):
-        '''Returns an iterable of objects matching criteria expressed in `query`
+        """Returns an iterable of objects matching criteria expressed in `query`
         De-serializes values on the way out, using a :ref:`deserialized_gen` to
         avoid incurring the cost of de-serializing all data at once, or ever, if
         iteration over results does not finish (subject to order generator
@@ -210,7 +201,7 @@ class SerializerShimDatastore(ShimDatastore):
 
         Raturns:
           iterable cursor with all objects matching criteria
-        '''
+        """
 
         # run the query on the child datastore
         cursor = self.child_datastore.query(query)
@@ -221,19 +212,19 @@ class SerializerShimDatastore(ShimDatastore):
         return cursor
 
 
-
 def shim(datastore, serializer=None):
-    '''Return a SerializerShimDatastore wrapping `datastore`.
+    """Return a SerializerShimDatastore wrapping `datastore`.
 
     Can be used as a syntacticly-nicer eay to wrap a datastore with a
     serializer::
 
         my_store = datastore.serialize.shim(my_store, json)
 
-    '''
+    """
     return SerializerShimDatastore(datastore, serializer=serializer)
 
-'''
+
+"""
 Hello World:
 
     >>> import datastore.core
@@ -252,4 +243,4 @@ Hello World:
     >>> ds.get(hello)
     None
 
-'''
+"""

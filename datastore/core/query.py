@@ -3,8 +3,9 @@ from .key import Key
 
 from functools import cmp_to_key
 
+
 def _object_getattr(obj, field):
-    '''Attribute getter for the objects to operate on.
+    """Attribute getter for the objects to operate on.
 
     This function can be overridden in classes or instances of Query, Filter, and
     Order. Thus, a custom function to extract values to attributes can be
@@ -36,7 +37,7 @@ def _object_getattr(obj, field):
           return version.attributes[field]['value']
 
 
-    '''
+    """
 
     # TODO: consider changing this to raise an exception if no value is found.
     value = None
@@ -53,10 +54,8 @@ def _object_getattr(obj, field):
     return value
 
 
-
-
 def limit_gen(limit, iterable):
-    '''A generator that applies a count `limit`.'''
+    """A generator that applies a count `limit`."""
     limit = int(limit)
     assert limit >= 0, 'negative limit'
 
@@ -68,10 +67,10 @@ def limit_gen(limit, iterable):
 
 
 def offset_gen(offset, iterable, skip_signal=None):
-    '''A generator that applies an `offset`, skipping `offset` elements from
+    """A generator that applies an `offset`, skipping `offset` elements from
     `iterable`. If skip_signal is a callable, it will be called with every
     skipped element.
-    '''
+    """
     offset = int(offset)
     assert offset >= 0, 'negative offset'
 
@@ -79,22 +78,20 @@ def offset_gen(offset, iterable, skip_signal=None):
         if offset > 0:
             offset -= 1
             if callable(skip_signal):
-                skip_signal(item)
+                skip_signal()
         else:
             yield item
 
 
 def chain_gen(iterables):
-    '''A generator that chains `iterables`.'''
+    """A generator that chains `iterables`."""
     for iterable in iterables:
         for item in iterable:
             yield item
 
 
-
-
 class Filter(object):
-    '''Represents a Filter for a specific field and its value.
+    """Represents a Filter for a specific field and its value.
 
     Filters are used on queries to narrow down the set of matching objects.
 
@@ -111,25 +108,24 @@ class Filter(object):
       Filter('name', '=', 'John Cleese')
       Filter('age', '>=', 18)
 
-    '''
+    """
 
     conditional_operators = ['<', '<=', '=', '!=', '>=', '>']
-    '''Conditional operators that Filters support.'''
+    """Conditional operators that Filters support."""
 
     _conditional_cmp = {
-        "<"  : lambda a, b: a < b,
-        "<=" : lambda a, b: a <= b,
-        "="  : lambda a, b: a == b,
-        "!=" : lambda a, b: a != b,
-        ">=" : lambda a, b: a >= b,
-        ">"  : lambda a, b: a > b
+        "<": lambda a, b: a < b,
+        "<=": lambda a, b: a <= b,
+        "=": lambda a, b: a == b,
+        "!=": lambda a, b: a != b,
+        ">=": lambda a, b: a >= b,
+        ">": lambda a, b: a > b
     }
 
-
     object_getattr = staticmethod(_object_getattr)
-    '''Object attribute getter. Can be overridden to match client data model.
+    """Object attribute getter. Can be overridden to match client data model.
     See :py:meth:`datastore.query._object_getattr`.
-    '''
+    """
 
     def __init__(self, field, op, value):
         if op not in self.conditional_operators:
@@ -140,29 +136,27 @@ class Filter(object):
         self.value = value
 
     def __call__(self, obj):
-        '''Returns whether this object passes this filter.
+        """Returns whether this object passes this filter.
         This method aggressively tries to find the appropriate value.
-        '''
+        """
         value = self.object_getattr(obj, self.field)
 
         # TODO: which way should the direction go here? it may make more sense to
         #       convert the passed-in value instead. Or try both? Or not at all?
-        if not isinstance(value, self.value.__class__) and not self.value is None and not value is None:
+        if not isinstance(value, self.value.__class__) and self.value is not None and value is not None:
             value = self.value.__class__(value)
 
-        return self.valuePasses(value)
+        return self.value_passes(value)
 
-    def valuePasses(self, value):
-        '''Returns whether this value passes this filter'''
+    def value_passes(self, value):
+        """Returns whether this value passes this filter"""
         return self._conditional_cmp[self.op](value, self.value)
-
 
     def __str__(self):
         return '%s %s %s' % (self.field, self.op, self.value)
 
     def __repr__(self):
         return "Filter('%s', '%s', %s)" % (self.field, self.op, repr(self.value))
-
 
     def __eq__(self, o):
         return self.field == o.field and self.op == o.op and repr(self.value) == repr(o.value)
@@ -174,28 +168,25 @@ class Filter(object):
         return hash(repr(self))
 
     def generator(self, iterable):
-        '''Generator function that iteratively filters given `items`.'''
+        """Generator function that iteratively filters given `items`."""
         for item in iterable:
             if self(item):
                 yield item
 
     @classmethod
     def filter(cls, filters, iterable):
-        '''Returns the elements in `iterable` that pass given `filters`'''
+        """Returns the elements in `iterable` that pass given `filters`"""
         if isinstance(filters, Filter):
             filters = [filters]
 
-        for filter in filters:
-            iterable = filter.generator(iterable)
+        for qfilter in filters:
+            iterable = qfilter.generator(iterable)
 
         return iterable
 
 
-
-
-
 class Order(object):
-    '''Represents an Order upon a specific field, and a direction.
+    """Represents an Order upon a specific field, and a direction.
     Orders are used on queries to define how they operate on objects
 
     Args:
@@ -210,15 +201,15 @@ class Order(object):
       Order('-age')    # descending order by age
       Order('score')   #  ascending order by score
 
-    '''
+    """
 
     order_operators = ['-', '+']
-    '''Ordering operators: + is ascending, - is descending.'''
+    """Ordering operators: + is ascending, - is descending."""
 
     object_getattr = staticmethod(_object_getattr)
-    '''Object attribute getter. Can be overridden to match client data model.
+    """Object attribute getter. Can be overridden to match client data model.
     See :py:meth:`datastore.query._object_getattr`.
-    '''
+    """
 
     def __init__(self, order):
         self.op = '+'
@@ -233,15 +224,13 @@ class Order(object):
         self.field = order
 
         if self.op not in self.order_operators:
-            raise ValueError('"%s" is not a valid Order Operator.' % op)
-
+            raise ValueError('"%s" is not a valid Order Operator.' % self.op)
 
     def __str__(self):
         return '%s%s' % (self.op, self.field)
 
     def __repr__(self):
         return "Order('%s%s')" % (self.op, self.field)
-
 
     def __eq__(self, other):
         return self.field == other.field and self.op == other.op
@@ -252,25 +241,24 @@ class Order(object):
     def __hash__(self):
         return hash(repr(self))
 
-
-    def isAscending(self):
+    def is_ascending(self):
         return self.op == '+'
 
-    def isDescending(self):
-        return not self.isAscending()
-
+    def is_descending(self):
+        return not self.is_ascending()
 
     def keyfn(self, obj):
-        '''A key function to be used in pythonic sort operations.'''
+        """A key function to be used in pythonic sort operations."""
         return self.object_getattr(obj, self.field)
 
     @classmethod
-    def multipleOrderComparison(cls, orders):
-        '''Returns a function that will compare two items according to `orders`'''
-        comparers = [ (o.keyfn, 1 if o.isAscending() else -1) for o in orders]
+    def multiple_order_comparison(cls, orders):
+        """Returns a function that will compare two items according to `orders`"""
+        comparers = [(o.keyfn, 1 if o.is_ascending() else -1) for o in orders]
 
         def cmp(a, b):
             return (a > b) - (a < b)
+
         def cmpfn(a, b):
             for keyfn, ascOrDesc in comparers:
                 comparison = cmp(keyfn(a), keyfn(b)) * ascOrDesc
@@ -282,29 +270,27 @@ class Order(object):
 
     @classmethod
     def get_sorted(cls, items, orders):
-        '''Returns the elements in `items` sorted according to `orders`
+        """Returns the elements in `items` sorted according to `orders`
         TODO: update cmpfn to py3 grammar
-        '''
+        """
 
-        keyf = cmp_to_key(cls.multipleOrderComparison(orders))
+        keyf = cmp_to_key(cls.multiple_order_comparison(orders))
         return sorted(items, key=keyf)
 
 
-
-
 class Query(object):
-    '''A Query describes a set of objects.
+    """A Query describes a set of objects.
 
     Queries are used to retrieve objects and instances matching a set of criteria
     from Datastores. Query objects themselves are simply descriptions,
     the actual Query implementations are left up to the Datastores.
-    '''
+    """
 
-    '''Object attribute getter. Can be overridden to match client data model.'''
+    """Object attribute getter. Can be overridden to match client data model."""
     object_getattr = staticmethod(_object_getattr)
 
     def __init__(self, key=Key('/'), limit=None, offset=0, offset_key=None, object_getattr=None):
-        ''' Initialize a query.
+        """ Initialize a query.
 
         Parameters
           key: a key representing the level of this query. For example, a Query with
@@ -325,7 +311,7 @@ class Query(object):
                allows the client to control the data model of the stored values.
                The default function attempts to access values as attributes
                (__getattr__) or items (__getitem__).
-        '''
+        """
         if not isinstance(key, Key):
             raise TypeError('key must be of type %s' % Key)
 
@@ -342,15 +328,15 @@ class Query(object):
             self.object_getattr = object_getattr
 
     def __str__(self):
-        '''Returns a string describing this query.'''
+        """Returns a string describing this query."""
         return repr(self)
 
     def __repr__(self):
-        '''Returns the representation of this query. Enables eval(repr(.)).'''
+        """Returns the representation of this query. Enables eval(repr(.))."""
         return 'Query.from_dict(%s)' % self.dict()
 
     def __call__(self, iterable):
-        '''Naively apply this query on an iterable of objects.
+        """Naively apply this query on an iterable of objects.
         Applying a query applies filters, sorts by appropriate orders, and returns
         a limited set.
 
@@ -359,7 +345,7 @@ class Query(object):
                  the entire result set will be in memory. Datastores with large
                  objects and large query results should translate the Query and
                  perform their own optimizations.
-        '''
+        """
 
         cursor = Cursor(self, iterable)
         cursor.apply_filter()
@@ -368,9 +354,8 @@ class Query(object):
         cursor.apply_limit()
         return cursor
 
-
     def order(self, order):
-        '''Adds an Order to this query.
+        """Adds an Order to this query.
 
         Args:
           see :py:class:`Order <datastore.query.Order>` constructor
@@ -379,17 +364,16 @@ class Query(object):
 
           query.order('+age').order('-home')
 
-        '''
+        """
         order = order if isinstance(order, Order) else Order(order)
 
         # ensure order gets attr values the same way the rest of the query does.
         order.object_getattr = self.object_getattr
         self.orders.append(order)
-        return self # for chaining
-
+        return self  # for chaining
 
     def filter(self, *args):
-        '''Adds a Filter to this query.
+        """Adds a Filter to this query.
 
         Args:
           see :py:class:`Filter <datastore.query.Filter>` constructor
@@ -398,21 +382,21 @@ class Query(object):
 
           query.filter('age', '>', 18).filter('sex', '=', 'Female')
 
-        '''
+        """
         if len(args) == 1 and isinstance(args[0], Filter):
-            filter = args[0]
+            qfilter = args[0]
         else:
-            filter = Filter(*args)
+            qfilter = Filter(*args)
 
         # ensure filter gets attr values the same way the rest of the query does.
-        filter.object_getattr = self.object_getattr
-        self.filters.append(filter)
-        return self # for chaining
+        qfilter.object_getattr = self.object_getattr
+        self.filters.append(qfilter)
+        return self  # for chaining
 
     def __lt__(self, other):
         return self.dict() < other.dict()
 
-    def __gt__(self,other):
+    def __gt__(self, other):
         return self.dict() > other.dict()
 
     def __eq__(self, other):
@@ -422,7 +406,7 @@ class Query(object):
         return hash(repr(self))
 
     def copy(self):
-        '''Returns a copy of this query.'''
+        """Returns a copy of this query."""
         if self.object_getattr is Query.object_getattr:
             other = Query(self.key)
         else:
@@ -435,7 +419,7 @@ class Query(object):
         return other
 
     def dict(self):
-        '''Returns a dictionary representing this query.'''
+        """Returns a dictionary representing this query."""
         d = dict()
         d['key'] = str(self.key)
 
@@ -454,7 +438,7 @@ class Query(object):
 
     @classmethod
     def from_dict(cls, dictionary):
-        '''Constructs a query from a dictionary.'''
+        """Constructs a query from a dictionary."""
         query = cls(Key(dictionary['key']))
 
         for key, value in list(dictionary.items()):
@@ -464,15 +448,14 @@ class Query(object):
                     query.order(order)
 
             elif key == 'filter':
-                for filter in value:
-                    if not isinstance(filter, Filter):
-                        filter = Filter(*filter)
-                    query.filter(filter)
+                for qfilter in value:
+                    if not isinstance(qfilter, Filter):
+                        qfilter = Filter(*qfilter)
+                    query.filter(qfilter)
 
             elif key in ['limit', 'offset', 'offset_key']:
                 setattr(query, key, value)
         return query
-
 
 
 def is_iterable(obj):
@@ -480,7 +463,7 @@ def is_iterable(obj):
 
 
 class Cursor(object):
-    '''Represents a query result generator.'''
+    """Represents a query result generator."""
 
     __slots__ = ('query', '_iterable', '_iterator', 'skipped', 'returned', )
 
@@ -497,11 +480,10 @@ class Cursor(object):
         self.returned = 0
         self.skipped = 0
 
-
     def __iter__(self):
-        '''The cursor itself is the iterator. Note that it cannot be used twice,
+        """The cursor itself is the iterator. Note that it cannot be used twice,
         and once iteration starts, the cursor cannot be modified.
-        '''
+        """
         if self._iterator:
             raise RuntimeError('Attempt to iterate over Cursor twice.')
 
@@ -509,42 +491,39 @@ class Cursor(object):
         return self
 
     def __next__(self):
-        '''Iterator next. Build up count of returned elements during iteration.'''
+        """Iterator next. Build up count of returned elements during iteration."""
 
         # if iteration has not begun, begin it.
         if not self._iterator:
             self.__iter__()
 
         next_item = next(self._iterator)  # will raise StopIteration at the end, should be caught by caller
-        self._returned_inc(next_item)
+        self._returned_inc()
         return next_item
 
-
-    def _skipped_inc(self, item):
-        '''A function to increment the skipped count.'''
+    def _skipped_inc(self):
+        """A function to increment the skipped count."""
         self.skipped += 1
 
-    def _returned_inc(self, item):
-        '''A function to increment the returned count.'''
+    def _returned_inc(self):
+        """A function to increment the returned count."""
         self.returned += 1
 
-
     def _ensure_modification_is_safe(self):
-        '''Assertions to ensure modification of this Cursor is safe.'''
+        """Assertions to ensure modification of this Cursor is safe."""
         assert self.query, 'Cursor must have a Query.'
         assert is_iterable(self._iterable), 'Cursor must have a resultset iterable.'
         assert not self._iterator, 'Cursor must not be modified after iteration.'
 
-
     def apply_filter(self):
-        '''Naively apply query filters.'''
+        """Naively apply query filters."""
         self._ensure_modification_is_safe()
 
         if len(self.query.filters) > 0:
             self._iterable = Filter.filter(self.query.filters, self._iterable)
 
     def apply_order(self):
-        '''Naively apply query orders.'''
+        """Naively apply query orders."""
         self._ensure_modification_is_safe()
 
         if len(self.query.orders) > 0:
@@ -552,7 +531,7 @@ class Cursor(object):
             # not a generator :(
 
     def apply_offset(self):
-        '''Naively apply query offset.'''
+        """Naively apply query offset."""
         self._ensure_modification_is_safe()
 
         if self.query.offset != 0:
@@ -561,9 +540,8 @@ class Cursor(object):
             # _skipped_inc helps keep count of skipped elements
 
     def apply_limit(self):
-        '''Naively apply query limit.'''
+        """Naively apply query limit."""
         self._ensure_modification_is_safe()
 
         if self.query.limit is not None:
             self._iterable = limit_gen(self.query.limit, self._iterable)
-

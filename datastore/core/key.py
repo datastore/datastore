@@ -1,10 +1,9 @@
-
-
 import uuid
 from .util import fasthash
 
+
 class Namespace(str):
-    '''
+    """
     A Key Namespace is a string identifier.
 
     A namespace can optionally include a field (delimited by ':')
@@ -14,7 +13,7 @@ class Namespace(str):
         Namespace('Bruces')
         Namespace('Song:PhilosopherSong')
 
-    '''
+    """
     namespace_delimiter = ':'
 
     def __repr__(self):
@@ -22,20 +21,19 @@ class Namespace(str):
 
     @property
     def field(self):
-        '''returns the `field` part of this namespace, if any.'''
+        """returns the `field` part of this namespace, if any."""
         if ':' in self:
             return self.split(self.namespace_delimiter)[0]
         return ''
 
     @property
     def value(self):
-        '''returns the `value` part of this namespace.'''
+        """returns the `value` part of this namespace."""
         return self.split(self.namespace_delimiter)[-1]
 
 
-
 class Key(object):
-    '''
+    """
     A Key represents the unique identifier of an object.
 
     Our Key scheme is inspired by file systems and the Google App Engine key
@@ -56,7 +54,7 @@ class Key(object):
         Key('/Comedy/MontyPython/Sketch:CheeseShop')
         Key('/Comedy/MontyPython/Sketch:CheeseShop/Character:Mousebender')
 
-    '''
+    """
 
     __slots__ = ('_string', '_list')
 
@@ -64,117 +62,112 @@ class Key(object):
         if isinstance(key, list):
             key = '/'.join(key)
 
-        self._string = self.removeDuplicateSlashes(str(key))
+        self._string = self.remove_duplicate_slashes(str(key))
         self._list = None
 
-
     def __str__(self):
-        '''Returns the string representation of this Key.'''
+        """Returns the string representation of this Key."""
         return self._string
 
     def __repr__(self):
-        '''Returns the repr of this Key.'''
+        """Returns the repr of this Key."""
         return "Key('%s')" % self._string
-
 
     @property
     def list(self):
-        '''Returns the `list` representation of this Key.
+        """Returns the `list` representation of this Key.
 
         Note that this method assumes the key is immutable.
-        '''
+        """
         if not self._list:
             self._list = list(map(Namespace, self._string.split('/')))
         return self._list
 
     @property
     def reverse(self):
-        '''Returns the reverse of this Key.
+        """Returns the reverse of this Key.
 
             >>> Key('/Comedy/MontyPython/Actor:JohnCleese').reverse
             Key('/Actor:JohnCleese/MontyPython/Comedy')
 
-        '''
+        """
         return Key(self.list[::-1])
 
     @property
     def namespaces(self):
-        '''Returns the list of namespaces of this Key.'''
+        """Returns the list of namespaces of this Key."""
         return self.list
 
     @property
     def name(self):
-        '''Returns the name of this Key, the value of the last namespace.'''
+        """Returns the name of this Key, the value of the last namespace."""
         return Namespace(self.list[-1]).value
 
     @property
     def type(self):
-        '''Returns the type of this Key, the field of the last namespace.'''
+        """Returns the type of this Key, the field of the last namespace."""
         return Namespace(self.list[-1]).field
 
     def instance(self, other):
-        '''Returns an instance Key, by appending a name to the namespace.'''
+        """Returns an instance Key, by appending a name to the namespace."""
         assert '/' not in str(other)
         return Key(str(self) + ':' + str(other))
 
     @property
     def path(self):
-        '''Returns the path of this Key, the parent and the type.'''
+        """Returns the path of this Key, the parent and the type."""
         return Key(str(self.parent) + '/' + self.type)
 
     @property
     def parent(self):
-        '''Returns the parent Key (all namespaces except the last).
+        """Returns the parent Key (all namespaces except the last).
 
             >>> Key('/Comedy/MontyPython/Actor:JohnCleese').parent
             Key('/Comedy/MontyPython')
 
-        '''
+        """
         if '/' in self._string:
             return Key(self.list[:-1])
         raise ValueError('%s is base key (it has no parent)' % repr(self))
 
     def child(self, other):
-        '''Returns the child Key by appending namespace `other`.
+        """Returns the child Key by appending namespace `other`.
 
             >>> Key('/Comedy/MontyPython').child('Actor:JohnCleese')
             Key('/Comedy/MontyPython/Actor:JohnCleese')
 
-        '''
+        """
         return Key('%s/%s' % (self._string, str(other)))
 
-
-    def isAncestorOf(self, other):
-        '''Returns whether this Key is an ancestor of `other`.
+    def is_ancestor_of(self, other):
+        """Returns whether this Key is an ancestor of `other`.
 
             >>> john = Key('/Comedy/MontyPython/Actor:JohnCleese')
-            >>> Key('/Comedy').isAncestorOf(john)
+            >>> Key('/Comedy').is_ancestor_of(john)
             True
 
-        '''
+        """
         if isinstance(other, Key):
             return other._string.startswith(self._string + '/')
         raise TypeError('%s is not of type %s' % (other, Key))
 
-    def isDescendantOf(self, other):
-        '''Returns whether this Key is a descendant of `other`.
+    def is_descendant_of(self, other):
+        """Returns whether this Key is a descendant of `other`.
 
-            >>> Key('/Comedy/MontyPython').isDescendantOf(Key('/Comedy'))
+            >>> Key('/Comedy/MontyPython').is_descendant_of(Key('/Comedy'))
             True
 
-        '''
+        """
         if isinstance(other, Key):
-            return other.isAncestorOf(self)
+            return other.is_ancestor_of(self)
         raise TypeError('%s is not of type %s' % (other, Key))
 
-
-    def isTopLevel(self):
-        '''Returns whether this Key is top-level (one namespace).'''
+    def is_top_level(self):
+        """Returns whether this Key is top-level (one namespace)."""
         return len(self.list) == 1
 
-
     def __hash__(self):
-        '''Returns the hash of this Key.
+        """Returns the hash of this Key.
 
         Note that for the purposes of this Key (that is, to use it and its hash
         values as unique identifiers across systems and platforms), the hash(.)
@@ -183,7 +176,7 @@ class Key(object):
 
         For our purposes, then, we are using a perhaps more expensive hash function
         that guarantees equal hash values given the same input.
-        '''
+        """
         return fasthash.fhash(self)
 
     def __iter__(self):
@@ -216,15 +209,12 @@ class Key(object):
     def __ge__(self, other):
         return self > other or self == other
 
-
     @classmethod
-    def randomKey(cls):
-        '''Returns a random Key'''
+    def random_key(cls):
+        """Returns a random Key"""
         return Key(uuid.uuid4().hex)
 
     @classmethod
-    def removeDuplicateSlashes(cls, path):
-        '''Returns the path string `path` without duplicate slashes.'''
+    def remove_duplicate_slashes(cls, path):
+        """Returns the path string `path` without duplicate slashes."""
         return '/' + '/'.join([p for p in path.split('/') if p != ''])
-
-
