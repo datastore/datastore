@@ -136,6 +136,10 @@ class FileSystemDatastore(datastore.Datastore):
         '''write out `object` to file at `path`'''
         ensure_directory_exists(os.path.dirname(path))
 
+        try:
+            value = value.encode()
+        except AttributeError:
+            pass
         with open(path, 'wb') as f:
             f.write(value)
 
