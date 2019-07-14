@@ -136,7 +136,7 @@ class FileSystemDatastore(datastore.Datastore):
         '''write out `object` to file at `path`'''
         ensure_directory_exists(os.path.dirname(path))
 
-        with open(path, 'w') as f:
+        with open(path, 'wb') as f:
             f.write(value)
 
     def _read_object(self, path):
@@ -147,7 +147,7 @@ class FileSystemDatastore(datastore.Datastore):
         if os.path.isdir(path):
             raise RuntimeError('%s is a directory, not a file.' % path)
 
-        with open(path) as f:
+        with open(path, 'rb') as f:
             file_contents = f.read()
 
         return file_contents
