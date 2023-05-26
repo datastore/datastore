@@ -8,7 +8,7 @@ pkgname = 'datastore'
 # gather the package information
 main_py = open('datastore/core/__init__.py').read()
 metadata = dict(re.findall("__([a-z]+)__ = '([^']+)'", main_py))
-packages = filter(lambda p: p.startswith(pkgname), find_packages())
+packages = list(filter(lambda p: p.startswith(pkgname), find_packages()))
 
 # convert the readme to pypi compatible rst
 try:
